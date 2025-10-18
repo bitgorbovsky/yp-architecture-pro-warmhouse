@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Context>
+
+Person(abstractUser, "Пользователь", "Пользователь, техник, администратор")
+
+Boundary(warmHouseEcosystem, "Экосистема Тёплый дом", $descr="Объединение платформы интернета вещей, приборов и приложений в единую экосистему") {
+    System_Boundary(warmHouseSystem, "Система компании Тёплый дом") {
+        System(warmHouseServer, "Сервер Тёплый дом")
+    }
+
+    System(warmHouseTemperaturSensor, "Температурный датчик", $sprite="robot", $tags="sensor")
+    System(warmHouseTemperaturRegulator, "Регулятор температуры", $sprite="robot", $tags="device")
+}
+
+Rel(abstractUser, warmHouseServer, "Управление приборами, наблюдение за температурой", "HTTPS")
+Rel(warmHouseServer, warmHouseTemperaturSensor, "Запрашивает показания температуры")
+Rel(warmHouseServer, warmHouseTemperaturRegulator, "Устанавливает нужную температуру")
+@enduml
