@@ -2,14 +2,14 @@
 
 package warmhouse.device.manager {
     class DeviceManager {
-        + start(deviceId: AbstractDeviceId, userId: String)
-        + stop(deviceId: AbstractDeviceId, userId: String)
+        + start(deviceId: DeviceID, userId: String)
+        + stop(deviceId: DeviceID, userId: String)
         + run(deviceId: DeviceState, userId: String)
-        + state(deviceId: AbstractDeviceId)
+        + state(deviceId: DeviceID)
     }
 
     class DeviceRegistryClient {
-        + getDeviceInfo(userId: String, deviceId: AbstractDeviceId)
+        + getDeviceInfo(userId: String, deviceId: DeviceID)
     }
 
     note right of DeviceManager::start

@@ -3,19 +3,24 @@
 package warmhouse.device.monitor {
     class DeviceMonitor {
         + cron: CRON
-        + checkState(deviceId: AbstractDeviceId)
+        + check(deviceId: DeviceID)
     }
 }
 
 package warmhouse.device.digtwin {
     class DeviceDigTwin {
+        + update(state: DeviceState)
+        + devices(since: Timestamp): DeviceState[]
     }
 }
 
 package warmhouse.device.client {
     class DeviceClient {
-        + state(deviceId: AbstractDeviceId): DeviceState
+        + state(deviceId: DeviceID): DeviceState
     }
 }
+
+DeviceMonitor --> DeviceDigTwin
+DeviceMonitor --> DeviceClient
 
 @enduml

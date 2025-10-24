@@ -4,10 +4,10 @@ package warmhouse.device.digtwin {
     class DeviceDigTwin {
         - cache: DeviceStateCache
         - queue: TelemetryQueue
-        + updateState(state: DeviceState)
-        + getState(AbstractDeviceId deviceId): DeviceState
-        + bindDeviceToUser(AbstractDeviceId deviceId, user: String)
-        + devices(): DeviceState[]
+        + update(state: DeviceState)
+        + state(deviceId: DeviceID): DeviceState
+        + bind(deviceId: DeviceID, user: String)
+        + devices(since: Timestamp): DeviceState[]
     }
 
     class StateMerger {
@@ -23,22 +23,22 @@ package warmhouse.device.digtwin {
 
     class DeviceStateCache {
         store(state: DeviceState)
-        get(deviceId: AbstractDeviceId)
+        get(deviceId: DeviceID)
     }
 }
 
 package warmhouse.device.client {
     class DeviceState
-    class AbstractDeviceId
+    class DeviceID
 }
 
 DeviceStateCache --o DeviceDigTwin
-DeviceStateCache ..> AbstractDeviceId : основной способ идентификации приборов
+DeviceStateCache ..> DeviceID : основной способ идентификации приборов
 TelemetryQueue --o DeviceDigTwin
 
 DeviceDigTwin --> StateMerger : cравнение и обновление состояний
 DeviceState "2" --o "1" StateMerger
 DeviceDigTwin ..> DeviceState : использует в качестве основной структуры
-DeviceDigTwin ..> AbstractDeviceId : основной способ идентификации приборов
+DeviceDigTwin ..> DeviceID : основной способ идентификации приборов
 
 @enduml
