@@ -1,0 +1,39 @@
+@startuml
+!include <C4/C4_Component>
+!include <C4/C4_Context>
+
+HIDE_STEREOTYPE()
+
+
+Boundary(DevicesRegistryService, "Реестр приборов") {
+    Component(DevicesCRUDController, "DevicesCRUDController",\
+              $descr="Создание записей по приборам, получение данных по приборам, привязанных к пользователю")
+    Component(DevicesDiscoveryController, "DevicesDiscoveryController", \
+              $descr="Компонент для поиска приборов, подключенных к системе, но не привязанных к пользователям")
+    Component(DevicesModel, "DevicesModel", \
+              $descr="Слой доступа к базе данных по приборам")
+
+    Rel(DevicesCRUDController, DevicesModel, "Чтение и запись данных пo приборам")
+    Rel(DevicesDiscoveryController, DevicesModel, "Чтение и запись данных по приборам и пользовательским привязкам")
+}
+
+Person(user, "Пользователь")
+System_Ext(DeviceControllerService, "Управление приборами, цифровые двойники приборов")
+Rel(DevicesDiscoveryController, DeviceControllerService, "Поиск подключенных приборов")
+
+Boundary(clientApps, "Клиентские приложения") {
+    System(clientMobileApp, "Мобильное приложение", $type="Android, iOS, Aurora")
+    System(clientWebApp, "Web-приложение", $type="Web($mol)")
+}
+Rel(user, clientMobileApp, "")
+Rel(user, clientWebApp, "")
+
+ComponentDb_Ext(devicesDb, "База данных приборов")
+Rel(DevicesModel, devicesDb, "Хранение данных")
+
+Rel(clientMobileApp, DevicesDiscoveryController, "Поиск и привязка приборов")
+Rel(clientMobileApp, DevicesCRUDController, "Получение и изменение данных по приборам")
+Rel(clientWebApp, DevicesCRUDController, "Получение и изменение данных по приборам")
+
+Lay_R(DeviceControllerService, DevicesDiscoveryController)
+@enduml

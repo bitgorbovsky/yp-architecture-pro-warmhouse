@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Component>
+!include <C4/C4_Context>
+
+
+Boundary(DevicesTelemetry, "Телеметрия") {
+    Component(DeviceTelemetryModel, "DeviceTelemetryModel", $descr="Набор моделей для хранения телеметрических данных приборов")
+}
+
+Person(user, "Пользователь")
+
+Boundary(clientApps, "Клиентские приложения") {
+    System(clientMobileApp, "Мобильное приложение", $type="Android, iOS, Aurora")
+    System(clientWebApp, "Web-приложение", $type="Web($mol)")
+}
+Rel(user, clientMobileApp, "")
+Rel(user, clientWebApp, "")
+@enduml

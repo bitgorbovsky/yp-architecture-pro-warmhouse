@@ -1,0 +1,85 @@
+@startuml
+!include <C4/C4_Container>
+!include <C4/C4_Context>
+
+'LAYOUT_LANDSCAPE()
+
+
+System_Boundary(warmhouseIoTEcosystem, "Экосистема Тёплый дом") {
+    System_Boundary(warmhouseIoT, "Тёплый дом") {
+        '---------------------------------------------------------------------
+        '- Контекст управления приборами
+        '---------------------------------------------------------------------
+        Container(DeviceController, \
+                  "Управление приборами, цифровые двойники приборов", \
+                  $descr="Передача команд, получение ответов, управление состоянием")
+        ContainerDb(DeviceControllerDB, \
+                    "Горячий кеш состояния приборов", \
+                    $descr="Хранение состояния цифровых двойников")
+        Rel_D(DeviceController, DeviceControllerDB, "Хранит состояние")
+
+        '---------------------------------------------------------------------
+        '- Контекст хранения сведений о приборах
+        '---------------------------------------------------------------------
+        Container(DeviceRegistry, \
+                  "Реестр приборов", \
+                  $descr="Регистрация приборов, удаление приборов из системы, привязка к пользователям")
+        ContainerDb(DevicesDB, "База данных приборов")
+        Rel(DeviceRegistry, DevicesDB, "Хранит данные")
+
+        '---------------------------------------------------------------------
+        '- Контекст обработки телеметрии
+        '---------------------------------------------------------------------
+        Container(DeviceTelemetry, \
+                  "Телеметрия", \
+                  $descr="Сбор, хранение, предоставление телеметрических данных")
+        ContainerDb(DeviceTelemetryDB, "База данных телеметрии")
+        Rel_R(DeviceTelemetry, DeviceTelemetryDB, "Хранит данные")
+
+        '---------------------------------------------------------------------
+        '- Контекст управления пользователями
+        '---------------------------------------------------------------------
+        Container(UsersService, \
+                  "Реестр пользователей", \
+                  $descr="Регистрация пользователей, их удаление, хранение пользовательских данных")
+        ContainerDb(UsersDB, "База данных пользователей")
+        Rel(UsersService, UsersDB, "Хранит данные")
+
+        '---------------------------------------------------------------------
+        '- Контекст управления размещением приборов
+        '---------------------------------------------------------------------
+        Container(PlacementManager, \
+                  "Размещение приборов", \
+                  $descr="Управление размещениями, привязка приборов к месту")
+        ContainerDb(PlacesDB, "База данных размещений")
+        Rel(PlacementManager, PlacesDB, "Хранит данные")
+    }
+
+    Rel_R(DeviceController, DeviceRegistry, "Получает сведения о приборе и его привязках к пользователю", "HTTPS")
+    Rel_L(DeviceRegistry, DeviceController, "Поиск приборов, подключенных к системе", "HTTPS")
+    Rel(DeviceTelemetry, DeviceController, "Периодически запрашивает состояние приборов", "HTTPS")
+
+    System(Device, "Прибор экосистемы Тёплый Дом", $sprite="robot")
+    BiRel_L(DeviceController, Device, "Сервис посылает команды, прибор отправляет ответы и состояние", "MQTT")
+
+    System(Client, "Клиентское приложение", $sprite="robot", $type="Web, Android, iOS, Aurora")
+}
+
+Person(User, "Пользователь")
+Rel(User, Client, "")
+
+Rel(Client, UsersService, "Регистрируется, авторизуется, аутентифицируется", "HTTPS")
+Rel(Client, DeviceRegistry, "Привязывает приборы к своей учётной записи, отвязывает их от неё, \
+                           задаёт дополнительные сведения", "HTTPS")
+Rel(Client, DeviceTelemetry, "Получает текущее состояние приборов, историю состояния", "HTTPS, WSS")
+Rel(Client, PlacementManager, "Задаёт места для размещения приборов, привязывает приборы к местам", "HTTPS")
+Rel(Client, DeviceController, "Управляет приборами", "HTTPS")
+
+'Настройки расположения элементов
+Lay_R(UsersService, PlacementManager)
+Lay_R(PlacementManager, DeviceController)
+Lay_R(DeviceController, DeviceRegistry)
+Lay_R(DeviceRegistry, UsersService)
+Lay_D(warmhouseIoT, Device)
+
+@enduml

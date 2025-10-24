@@ -1,0 +1,45 @@
+@startuml
+!include <C4/C4_Component>
+!include <C4/C4_Context>
+
+
+
+Boundary(DeviceController, "Управление приборами") {
+    Component(DeviceManager, "DeviceManager", \
+              $descr="Работа с сессиями управления приборов, изменение состояния приборов")
+    Component(DeviceDigitalTwin, "DeviceDigitalTwin", \
+              $tags="model", \
+              $descr="Цифровой двойник прибора")
+    Component(DeviceClient, "DeviceClient", \
+              $descr="Взаимодействие с прибором: \
+                      отправка команд, приём ответов")
+    Component(DeviceMonitor, "DeviceMonitor", \
+              $descr="Мониторинг состояния приборов: периодические проверки состояния (keep-alive)")
+}
+
+Person(user, "Пользователь")
+Boundary(clientApps, "Клиентские приложения") {
+    System(clientMobileApp, "Мобильное приложение", $type="Android, iOS, Aurora")
+    System(clientWebApp, "Web-приложение", $type="Web($mol)")
+}
+Rel(user, clientMobileApp, "")
+Rel(user, clientWebApp, "")
+
+Rel(clientMobileApp, DeviceManager, "Открывает сессии управления приборами, управляет приборами")
+Rel(clientWebApp, DeviceManager, "Открывает сессии управления приборами, управляет приборами")
+
+Component_Ext(DeviceRegistry, "Реестр приборов")
+ComponentDb_Ext(DeviceStateCache, "DeviceStateCache")
+
+Rel(DeviceManager, DeviceClient, "Передача команд и получение ответов")
+Rel(DeviceManager, DeviceDigitalTwin, "Работа с состоянием приборов")
+Rel(DeviceDigitalTwin, DeviceStateCache, "Хранение состояния приборов")
+Rel(DeviceMonitor, DeviceClient, "Отправка команд проверки состояния")
+Rel(DeviceMonitor, DeviceDigitalTwin, "Работа с состоянием прибора")
+Rel(DeviceManager, DeviceRegistry, "Получение сведений о приборе")
+
+Lay_U(DeviceMonitor, DeviceDigitalTwin)
+Lay_L(DeviceManager, DeviceRegistry)
+Lay_L(DeviceDigitalTwin, DeviceStateCache)
+
+@enduml
