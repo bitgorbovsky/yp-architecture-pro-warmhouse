@@ -1,0 +1,93 @@
+@startuml
+
+package warmhouse.device.client {
+    class DeviceCommunicator <<module>> {
+        - deviceClients: DeviceClient[]
+        + state(deviceId: AbstractDeviceId): DeviceState
+        + run(deviceId: AbstractDeviceId, newState: DeviceState): CommandResult
+        + onEvent(deviceEventHandler: Function<DeviceState>)
+    }
+
+    class DeviceState {
+        + deviceId: AbstractDeviceId
+        + status: DeviceStatus
+        + timestamp: Timestamp
+        + features(): Feature[]
+    }
+
+    class AbstractDeviceId {
+        + protocol: Protocol
+        + id: String
+        + {abstract} makeAddress(): String
+    }
+
+    class Feature {
+        + attributes(): Attribute[]
+        + childs(): Feature[]
+    }
+
+    struct Attribute {
+        + name: String
+        + type: Type
+        + value: Any
+        + unit: MeasurableUnit
+        + timestamp: Timestamp
+    }
+
+    enum Protocol {
+        + MQTT
+        + CoAP
+        + HTTP
+    }
+
+    enum DeviceStatus {
+        + online
+        + offline
+        + active
+        + busy
+    }
+
+    class CommandResult {
+        statusCode: integer
+        state: DeviceState
+    }
+
+    interface DeviceClient {
+        + state(deviceId: AbstractDeviceId): DeviceState
+        + run(deviceId: AbstractDeviceId, command: DeviceCommand): CommandResult
+        + onEvent(deviceEventHandler: Function<DeviceState>)
+    }
+
+    class DeviceMQTTClient
+    class DeviceHTTPClient
+    class DeviceCoAPClient
+    class MQTTDeviceId
+    class HTTPDeviceId
+    class CoAPDeviceId
+}
+
+
+DeviceMQTTClient ..|> DeviceClient
+DeviceHTTPClient ..|> DeviceClient
+DeviceCoAPClient ..|> DeviceClient
+DeviceClient "*" --* "1" DeviceCommunicator
+
+
+MQTTDeviceId ..|> AbstractDeviceId
+HTTPDeviceId ..|> AbstractDeviceId
+CoAPDeviceId ..|> AbstractDeviceId
+
+AbstractDeviceId --> Protocol
+Feature "1" --* "*" Feature
+Attribute "*" --* "1" Feature
+
+Feature "1" --* "*" DeviceState
+DeviceState "1" --* "1" CommandResult
+AbstractDeviceId "1" --* "1" DeviceState
+
+DeviceCommunicator --> AbstractDeviceId : использует
+DeviceCommunicator --> CommandResult : порождает
+DeviceCommunicator --> DeviceState: порождает
+DeviceState "1" --> "1" DeviceStatus
+
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+
+package warmhouse.device.monitor {
+    class DeviceMonitor {
+        + cron: CRON
+        + checkState(deviceId: AbstractDeviceId)
+    }
+}
+
+package warmhouse.device.digtwin {
+    class DeviceDigTwin {
+    }
+}
+
+package warmhouse.device.client {
+    class DeviceClient {
+        + state(deviceId: AbstractDeviceId): DeviceState
+    }
+}
+
+@enduml

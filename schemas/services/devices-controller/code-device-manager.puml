@@ -1,0 +1,42 @@
+@startuml
+
+package warmhouse.device.manager {
+    class DeviceManager {
+        + start(deviceId: AbstractDeviceId, userId: String)
+        + stop(deviceId: AbstractDeviceId, userId: String)
+        + run(deviceId: DeviceState, userId: String)
+        + state(deviceId: AbstractDeviceId)
+    }
+
+    class DeviceRegistryClient {
+        + getDeviceInfo(userId: String, deviceId: AbstractDeviceId)
+    }
+
+    note right of DeviceManager::start
+    POST /v1/devices
+    end note
+
+    note right of DeviceManager::stop
+    DELETE /v1/devices/{deviceId}
+    end note
+
+    note right of DeviceManager::run
+    PUT /v1/devices/{deviceId}
+    PATCH /v1/devices/{deviceId}
+    end note
+
+    note right of DeviceManager::state
+    GET /v1/devices/{deviceId}
+    end note
+}
+
+package warmhouse.device.client {
+    class DeviceDigTwin
+    class DeviceClient
+}
+
+DeviceManager --> DeviceDigTwin
+DeviceManager --> DeviceClient
+DeviceManager --> DeviceRegistryClient
+
+@enduml
