@@ -30,16 +30,23 @@ Rel(clientWebApp, DeviceManager, "Открывает сессии управле
 
 Component_Ext(DeviceRegistry, "Реестр приборов")
 ComponentDb_Ext(DeviceStateCache, "DeviceStateCache")
+ComponentQueue_Ext(DeviceTelemetryBus, "Шина телеметрии")
+Component_Ext(Device, "Прибор")
 
-Rel(DeviceManager, DeviceClient, "Передача команд и получение ответов")
-Rel(DeviceManager, DeviceDigitalTwin, "Работа с состоянием приборов")
+BiRel(DeviceManager, DeviceClient, "Передача команд, получение ответов и состояния")
+Rel(DeviceManager, DeviceDigitalTwin, "Работа с состоянием прибора")
 Rel(DeviceDigitalTwin, DeviceStateCache, "Хранение состояния приборов")
 Rel(DeviceMonitor, DeviceClient, "Отправка команд проверки состояния")
 Rel(DeviceMonitor, DeviceDigitalTwin, "Работа с состоянием прибора")
 Rel(DeviceManager, DeviceRegistry, "Получение сведений о приборе")
+Rel(DeviceDigitalTwin, DeviceTelemetryBus, "Отправка событий телеметрии")
+BiRel(DeviceClient, Device, "Взаимодействие с прибором")
 
 Lay_U(DeviceMonitor, DeviceDigitalTwin)
 Lay_L(DeviceManager, DeviceRegistry)
 Lay_L(DeviceDigitalTwin, DeviceStateCache)
+Lay_L(DeviceDigitalTwin, DeviceTelemetryBus)
+Lay_D(DeviceStateCache, DeviceTelemetryBus)
+Lay_R(DeviceManager, DeviceRegistry)
 
 @enduml

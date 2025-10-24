@@ -16,7 +16,7 @@ System_Boundary(warmhouseIoTEcosystem, "Экосистема Тёплый дом
         ContainerDb(DeviceControllerDB, \
                     "Горячий кеш состояния приборов", \
                     $descr="Хранение состояния цифровых двойников")
-        Rel_D(DeviceController, DeviceControllerDB, "Хранит состояние")
+        Rel(DeviceController, DeviceControllerDB, "Хранит состояние")
 
         '---------------------------------------------------------------------
         '- Контекст хранения сведений о приборах
@@ -35,6 +35,8 @@ System_Boundary(warmhouseIoTEcosystem, "Экосистема Тёплый дом
                   $descr="Сбор, хранение, предоставление телеметрических данных")
         ContainerDb(DeviceTelemetryDB, "База данных телеметрии")
         Rel_R(DeviceTelemetry, DeviceTelemetryDB, "Хранит данные")
+        ContainerQueue(DeviceTelemetryBus, "Шина телеметрических данных", \
+                       $descr="Очередь с событиями телеметрии")
 
         '---------------------------------------------------------------------
         '- Контекст управления пользователями
@@ -57,10 +59,11 @@ System_Boundary(warmhouseIoTEcosystem, "Экосистема Тёплый дом
 
     Rel_R(DeviceController, DeviceRegistry, "Получает сведения о приборе и его привязках к пользователю", "HTTPS")
     Rel_L(DeviceRegistry, DeviceController, "Поиск приборов, подключенных к системе", "HTTPS")
-    Rel(DeviceTelemetry, DeviceController, "Периодически запрашивает состояние приборов", "HTTPS")
+    Rel(DeviceController, DeviceTelemetryBus, "Публикует события телеметрии")
+    Rel_U(DeviceTelemetryBus, DeviceTelemetry, "Обрабатывает события телеметрии")
 
     System(Device, "Прибор экосистемы Тёплый Дом", $sprite="robot")
-    BiRel_L(DeviceController, Device, "Сервис посылает команды, прибор отправляет ответы и состояние", "MQTT")
+    BiRel(DeviceController, Device, "Сервис посылает команды, прибор отправляет ответы и состояние", "MQTT")
 
     System(Client, "Клиентское приложение", $sprite="robot", $type="Web, Android, iOS, Aurora")
 }
@@ -75,11 +78,7 @@ Rel(Client, DeviceTelemetry, "Получает текущее состояние
 Rel(Client, PlacementManager, "Задаёт места для размещения приборов, привязывает приборы к местам", "HTTPS")
 Rel(Client, DeviceController, "Управляет приборами", "HTTPS")
 
-'Настройки расположения элементов
-Lay_R(UsersService, PlacementManager)
-Lay_R(PlacementManager, DeviceController)
-Lay_R(DeviceController, DeviceRegistry)
-Lay_R(DeviceRegistry, UsersService)
-Lay_D(warmhouseIoT, Device)
+Lay_U(DeviceController, DeviceRegistry)
+Lay_L(DeviceController, DeviceTelemetryBus)
 
 @enduml
