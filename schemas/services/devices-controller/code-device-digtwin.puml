@@ -24,6 +24,7 @@ package warmhouse.device.digtwin {
     class DeviceStateCache {
         store(state: DeviceState)
         get(deviceId: DeviceID)
+        range(since: Timestamp): DeviceState
     }
 }
 
