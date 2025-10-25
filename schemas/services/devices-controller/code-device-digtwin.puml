@@ -1,30 +1,23 @@
 @startuml
 
 package warmhouse.device.digtwin {
-    class DeviceDigTwin {
-        - cache: DeviceStateCache
-        - queue: TelemetryQueue
-        + update(state: DeviceState)
-        + state(deviceId: DeviceID): DeviceState
+    class DeviceDigTwinRepository {
         + bind(deviceId: DeviceID, user: String)
-        + devices(since: Timestamp): DeviceState[]
+        + unbind(deviceId: DeviceID, user: String)
+        + state(deviceId: DeviceID): DeviceState
+        + apply(deviceId: DeviceID, state: DeviceState)
+        + devices(since: Timestamp, to: Timestamp): DeviceState[]
     }
 
     class StateMerger {
-        old: DeviceState
-        new: DeviceState
-        + mergeable(): boolean
+        + old: DeviceState
+        + new: DeviceState
+        + hasDiff(): boolean
         + merge(): DeviceState
     }
 
     class TelemetryQueue {
-        publish(message: Any)
-    }
-
-    class DeviceStateCache {
-        store(state: DeviceState)
-        get(deviceId: DeviceID)
-        range(since: Timestamp): DeviceState
+        publish(state: DeviceState)
     }
 }
 
@@ -33,13 +26,10 @@ package warmhouse.device.client {
     class DeviceID
 }
 
-DeviceStateCache --o DeviceDigTwin
-DeviceStateCache ..> DeviceID : основной способ идентификации приборов
-TelemetryQueue --o DeviceDigTwin
-
-DeviceDigTwin --> StateMerger : cравнение и обновление состояний
+DeviceDigTwinRepository --> TelemetryQueue : публикация событий приборов
+DeviceDigTwinRepository --> StateMerger : cравнение и обновление состояний
+DeviceDigTwinRepository ..> DeviceState : использует в качестве основной структуры
+DeviceDigTwinRepository ..> DeviceID : основной способ идентификации приборов
 DeviceState "2" --o "1" StateMerger
-DeviceDigTwin ..> DeviceState : использует в качестве основной структуры
-DeviceDigTwin ..> DeviceID : основной способ идентификации приборов
 
 @enduml

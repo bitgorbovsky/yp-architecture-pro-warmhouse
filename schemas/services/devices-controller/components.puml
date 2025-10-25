@@ -2,9 +2,7 @@
 !include <C4/C4_Component>
 !include <C4/C4_Context>
 
-
-
-Boundary(DeviceController, "Управление приборами") {
+Boundary(DevicesController, "Управление приборами") {
     Component(DeviceManager, "DeviceManager", \
               $descr="Работа с сессиями управления приборов, изменение состояния приборов")
     Component(DeviceDigitalTwin, "DeviceDigitalTwin", \
@@ -29,13 +27,13 @@ Rel(clientMobileApp, DeviceManager, "Открывает сессии управ�
 Rel(clientWebApp, DeviceManager, "Открывает сессии управления приборами, управляет приборами")
 
 Component_Ext(DeviceRegistry, "Реестр приборов")
-ComponentDb_Ext(DeviceStateCache, "DeviceStateCache")
+ComponentDb_Ext(DevicesControllerCache, "Горячий кеш состояния приборов")
 ComponentQueue_Ext(DeviceTelemetryBus, "Шина телеметрии")
 Component_Ext(Device, "Прибор")
 
 BiRel(DeviceManager, DeviceClient, "Передача команд, получение ответов и состояния")
 Rel(DeviceManager, DeviceDigitalTwin, "Работа с состоянием прибора")
-Rel(DeviceDigitalTwin, DeviceStateCache, "Хранение состояния приборов")
+Rel(DeviceDigitalTwin, DevicesControllerCache, "Хранение состояния приборов")
 Rel(DeviceMonitor, DeviceClient, "Отправка команд проверки состояния")
 Rel(DeviceMonitor, DeviceDigitalTwin, "Работа с состоянием прибора")
 Rel(DeviceManager, DeviceRegistry, "Получение сведений о приборе")
@@ -44,9 +42,9 @@ BiRel(DeviceClient, Device, "Взаимодействие с прибором")
 
 Lay_U(DeviceMonitor, DeviceDigitalTwin)
 Lay_L(DeviceManager, DeviceRegistry)
-Lay_L(DeviceDigitalTwin, DeviceStateCache)
+Lay_L(DeviceDigitalTwin, DevicesControllerCache)
 Lay_L(DeviceDigitalTwin, DeviceTelemetryBus)
-Lay_D(DeviceStateCache, DeviceTelemetryBus)
+Lay_D(DevicesControllerCache, DeviceTelemetryBus)
 Lay_R(DeviceManager, DeviceRegistry)
 
 @enduml

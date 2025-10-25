@@ -4,53 +4,54 @@
 
 HIDE_STEREOTYPE()
 
-Boundary(usersService, "Реестр пользователей") {
+Boundary(Users, "Реестр пользователей") {
     Component(AuthController, "AuthController", \
               $descr="Вход в систему (аутентификация), выход из системы, получение прав доступа (авторизация)")
     Component(RegistrationController, "RegistrationController", \
               $descr="Регистрация пользователей")
-    Component(ChangePasswordController, "ChangePasswordController", \
+    Component(PasswordController, "PasswordController", \
               $descr="Сброс, восстановление и смена пароля")
-    Component(UserProfileController, "UserProfileController", \
+    Component(ProfileController, "ProfileController", \
               $descr="Обработка профиля пользователя")
-    Component(UserProfileModel, "UserProfileModel", \
+    Component(ProfileRepository, "ProfileRepository", \
               $descr="Слой доступа к данным пользователя")
     Component(Notifier, "Notifier", \
               $descr="Отправка уведомлений через email или СМС")
 
-    Rel(UserProfileController, UserProfileModel, "Чтение и запись профиля пользователя")
-    Rel(AuthController, UserProfileModel, "Поиск пользователя, ведение истории входов (аудит)")
+    Rel(ProfileController, ProfileRepository, "Чтение и запись профиля пользователя")
+    Rel(AuthController, ProfileRepository, "Поиск пользователя, ведение истории входов (аудит)")
+    Rel(AuthController, Notifier, "Отправка письма с кодом для подтверждения входа")
 
-    Rel(RegistrationController, UserProfileModel, "Создание нового пользователя")
+    Rel(RegistrationController, ProfileRepository, "Создание нового пользователя")
     Rel(RegistrationController, Notifier, "Отправка уведомления с кодом подтверждения")
 
-    Rel(ChangePasswordController, UserProfileModel, "Изменение пароля пользователя")
-    Rel(ChangePasswordController, Notifier, "Отправка письма с кодом подтверждения на сброс пароля")
+    Rel(PasswordController, ProfileRepository, "Изменение пароля пользователя")
+    Rel(PasswordController, Notifier, "Отправка письма с кодом подтверждения на сброс пароля")
 }
 
-ComponentDb_Ext(usersDb, "База данных пользователей")
-Rel(UserProfileModel, usersDb, "Хранение данных")
+ComponentDb_Ext(UsersDB, "База данных пользователей")
+Rel(ProfileRepository, UsersDB, "Хранение данных")
 
-Container_Ext(communicationGateway, "Сторонний сервис отправки уведомлений")
-Rel(Notifier, communicationGateway, "Отправка уведомлений")
+Container_Ext(CommunicationGateway, "Сторонний сервис отправки уведомлений")
+Rel(Notifier, CommunicationGateway, "Отправка уведомлений")
 
-Person(user, "Пользователь")
+Person(User, "Пользователь")
 
 Boundary(clientApps, "Клиентские приложения") {
     System(clientMobileApp, "Мобильное приложение", $type="Android, iOS, Aurora")
     System(clientWebApp, "Web-приложение", $type="Web($mol)")
 }
 
-Rel(user, clientMobileApp, "")
-Rel(user, clientWebApp, "")
+Rel(User, clientMobileApp, "")
+Rel(User, clientWebApp, "")
 
 Rel(clientMobileApp, RegistrationController, "Создание новой учётной записи", "HTTPS")
 Rel(clientMobileApp, AuthController, "Вход в систему, выход из системы", "HTTPS")
-Rel(clientMobileApp, ChangePasswordController, "Сброс пароля, установка пароля", "HTTPS")
-Rel(clientMobileApp, UserProfileController, "Работа с профилем пользователя", "HTTPS")
+Rel(clientMobileApp, PasswordController, "Сброс пароля, установка пароля", "HTTPS")
+Rel(clientMobileApp, ProfileController, "Работа с профилем пользователя", "HTTPS")
 Rel(clientWebApp, RegistrationController, "Создание новой учётной записи", "HTTPS")
 Rel(clientWebApp, AuthController, "Вход в систему, выход из системы", "HTTPS")
-Rel(clientWebApp, ChangePasswordController, "Сброс пароля, установка пароля", "HTTPS")
-Rel(clientWebApp, UserProfileController, "Работа с профилем пользователя", "HTTPS")
+Rel(clientWebApp, PasswordController, "Сброс пароля, установка пароля", "HTTPS")
+Rel(clientWebApp, ProfileController, "Работа с профилем пользователя", "HTTPS")
 
 @enduml

@@ -1,0 +1,103 @@
+@startuml
+
+package warmhouse.users.registry.controller {
+    class ProfileController {
+        + get(userId: String): User
+        + update(userId: String, profile: User)
+        + delete(userId: String)
+        + sessions(userId: String)
+    }
+
+    class RegistrationController {
+        + create(login: String, password: String)
+        + confirm(userId: String, activationCode: String)
+    }
+
+    class PasswordController {
+        + change(userId: String)
+        + confirm(userId: String, changePasswordCode: String)
+    }
+
+    class SessionController {
+        + authenticate(login: String, password: String)
+        + confirm(userId: String, sessionId: String, authCode: String)
+        + refresh(userId: String, sessionId: String, refreshToken: String)
+        + logout(userId: String, sessionId: String)
+    }
+}
+
+package warmhouse.users.registry.notifications {
+    class Notifier {
+        + sendEmail(email: String)
+        + sendSMS(phoneNumber: String)
+    }
+}
+
+package warmhouse.users.registry.repository {
+    class ProfileRepository {
+        + get(login: String): User
+        + create(user: User)
+        + update(userId: String, profile: User)
+        + delete(userId: String)
+    }
+
+    class SessionRepository {
+        + new(userId: String)
+        + confirm(userId: String, sessionId: String, activationCode: String)
+        + delete(userId: String, sessionId: String)
+    }
+}
+
+package warmhouse.users.registry.model {
+    enum ProfileStatus {
+        + NOT_CONFIRMED
+        + ACTIVE
+        + DELETED
+    }
+
+    enum Gender {
+        + MALE
+        + FEMALE
+    }
+
+    dataclass User {
+        id: int
+        email: String
+        birthdata: Date
+        gender: Gender
+        created: Datetime
+        updated: Datetime
+        state: ProfileStatus
+        passwordHash: String
+        activationCodeHash: String
+        changePasswordCodeHash: String
+    }
+
+    dataclass Session {
+        userId: Strin
+        loginTimestamp: Datetime
+        agent: String
+        refreshToken: String
+    }
+}
+
+SessionController --> ProfileRepository
+SessionController --> SessionRepository
+SessionController -up-> Notifier
+
+ProfileController --> ProfileRepository
+
+RegistrationController --> ProfileRepository
+RegistrationController -up-> Notifier
+
+PasswordController --> ProfileRepository
+PasswordController -up-> Notifier
+
+ProfileRepository -down-> User
+
+SessionRepository --> Session
+
+Gender -up-* User
+ProfileStatus -up-* User
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+
+package warmhouse.device.telemetry.controller {
+    class Controller {
+        + last(deviceId: DeviceID, user: String): TelemetryRecord
+        + history(deviceId: DeviceID, user: String, since: Timestamp, to: Timestamp): TelemetryRecord[]
+    }
+}
+
+package warmhouse.device.telemetry.processing {
+    class Consumer {
+        + poll(): TelemetryRecord[]
+    }
+
+    class Processor {
+        + loop()
+    }
+
+}
+
+package warmhouse.device.telemetry.repository {
+    class Repository {
+        + last(deviceId: DeviceID, user: String): TelemetryRecord
+        + history(deviceId: DeviceID, user: Strig, sinc: Timestamp, to: Timestamp): TelemetryRecord[]
+        + save(record: TelemetryRecord)
+    }
+}
+
+package warmhouse.device.telemetry.model {
+    dataclass TelemetryRecord {
+        deviceId: DeviceID
+        state: DeviceState
+        timestamp: Timestamp
+        user: String
+    }
+}
+
+Processor --> Consumer: вызывает Consumer.poll()
+Processor --> Repository: вызывает Repository.save(record)
+Repository --> TelemetryRecord: порождает
+Controller --> Repository: вызывает last(...) или history(...)
+
+@enduml

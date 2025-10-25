@@ -1,42 +1,16 @@
 @startuml
 
 package warmhouse.device.client {
-    class DeviceCommunicator <<module>> {
-        - deviceClients: DeviceClient[]
-        + state(deviceId: DeviceID): DeviceState
-        + run(deviceId: DeviceID, newState: DeviceState): CommandResult
-        + onEvent(deviceEventHandler: Function<DeviceState>)
-    }
-
-    class DeviceState {
-        + deviceId: DeviceID
-        + status: DeviceStatus
-        + timestamp: Timestamp
-        + features(): Feature[]
-    }
-
-    class DeviceID {
-        + protocol: Protocol
-        + id: String
-    }
-
-    class Feature {
-        + attributes(): Attribute[]
-        + childs(): Feature[]
-    }
-
-    struct Attribute {
-        + name: String
-        + type: Type
-        + value: Any
-        + unit: MeasurableUnit
-        + timestamp: Timestamp
-    }
-
     enum Protocol {
         + MQTT
         + CoAP
         + HTTP
+        + ...
+    }
+
+    enum Provider {
+        + warmhouse
+        + ...
     }
 
     enum DeviceStatus {
@@ -46,39 +20,88 @@ package warmhouse.device.client {
         + busy
     }
 
+    enum MeasurableUnit {
+        + celsium
+        + ampers
+        + volts
+        + lumens
+        + ...
+    }
+
+    enum Type {
+        + int
+        + string
+        + enum
+        + ...
+    }
+
+    class DeviceID {
+        + provider: Provider
+        + protocol: Protocol
+        + address: String
+    }
+
+    class DeviceState {
+        + status: DeviceStatus
+        + timestamp: Timestamp
+        + features(): Feature[]
+    }
+
+    class Feature {
+        + name: String
+        + type: Type
+        + value: Any
+        + unit: MeasurableUnit
+        + timestamp: Timestamp
+        + childs: Feature[]
+    }
+
     class CommandResult {
         statusCode: integer
         state: DeviceState
     }
 
     interface DeviceClient {
-        + state(deviceId: DeviceID): DeviceState
-        + run(deviceId: DeviceID, command: DeviceCommand): CommandResult
-        + onEvent(deviceEventHandler: Function<DeviceState>)
+        + provider: Provider
+        + protocol: Protocol
+        + init(address: String): DeviceState
+        + state(address: String): DeviceState
+        + apply(address: String, state: DeviceState): CommandResult
+        + onChange(deviceEventHandler: Function<String, DeviceState>)
     }
 
-    class DeviceMQTTClient
-    class DeviceHTTPClient
+    class DeviceTuyaMQTTClient
+    class DeviceWarmhouseHTTPClient
     class DeviceCoAPClient
+
+    class DeviceCommunicator <<module>> {
+        - clients: DeviceClient[]
+        + init(deviceId: DeviceID): DeviceState
+        + state(deviceId: DeviceID): DeviceState
+        + apply(deviceId: DeviceID, state: DeviceState): CommandResult
+        + onChange(deviceEventHandler: Function<DeviceID, DeviceState>)
+    }
 }
 
-
-DeviceMQTTClient ..|> DeviceClient
-DeviceHTTPClient ..|> DeviceClient
+DeviceTuyaMQTTClient ..|> DeviceClient
+DeviceWarmhouseHTTPClient ..|> DeviceClient
 DeviceCoAPClient ..|> DeviceClient
 DeviceClient "*" --* "1" DeviceCommunicator
 
 DeviceID --> Protocol
-Feature "1" --* "*" Feature
-Attribute "*" --* "1" Feature
+DeviceID --> Provider
 
-Feature "1" --* "*" DeviceState
-DeviceState "1" --* "1" CommandResult
-DeviceID "1" --* "1" DeviceState
+Feature "1" --* "*" Feature
+MeasurableUnit --* Feature
+Type --* Feature
+
+Feature --* DeviceState
+DeviceState --* CommandResult
+DeviceID  --* DeviceState
 
 DeviceCommunicator --> DeviceID : использует
 DeviceCommunicator --> CommandResult : порождает
 DeviceCommunicator --> DeviceState: порождает
-DeviceState "1" --> "1" DeviceStatus
+DeviceState --> DeviceStatus
 
 @enduml

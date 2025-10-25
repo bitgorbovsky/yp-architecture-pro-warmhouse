@@ -9,8 +9,8 @@ package warmhouse.device.monitor {
 
 package warmhouse.device.digtwin {
     class DeviceDigTwin {
-        + update(state: DeviceState)
-        + devices(since: Timestamp): DeviceState[]
+        + apply(deviceId: DeviceID, state: DeviceState)
+        + devices(since: Timestamp, to: Timestamp): DeviceID[]
     }
 }
 

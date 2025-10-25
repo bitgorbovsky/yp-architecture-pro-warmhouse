@@ -10,60 +10,54 @@ System_Boundary(warmhouseIoTEcosystem, "Экосистема Тёплый дом
         '---------------------------------------------------------------------
         '- Контекст управления приборами
         '---------------------------------------------------------------------
-        Container(DeviceController, \
-                  "Управление приборами, цифровые двойники приборов", \
-                  $descr="Передача команд, получение ответов, управление состоянием")
-        ContainerDb(DeviceControllerDB, \
-                    "Горячий кеш состояния приборов", \
+        Container(DevicesController, "Управление приборами", \
+                  $descr="Передача команд, получение ответов, цифровые двойники приборов")
+        ContainerDb(DevicesControllerCache, "Горячий кеш состояния приборов", \
                     $descr="Хранение состояния цифровых двойников")
-        Rel(DeviceController, DeviceControllerDB, "Хранит состояние")
+        Rel(DevicesController, DevicesControllerCache, "Хранит состояние")
 
         '---------------------------------------------------------------------
         '- Контекст хранения сведений о приборах
         '---------------------------------------------------------------------
-        Container(DeviceRegistry, \
-                  "Реестр приборов", \
+        Container(Devices, "Реестр приборов", \
                   $descr="Регистрация приборов, удаление приборов из системы, привязка к пользователям")
         ContainerDb(DevicesDB, "База данных приборов")
-        Rel(DeviceRegistry, DevicesDB, "Хранит данные")
+        Rel(Devices, DevicesDB, "Хранит данные")
 
         '---------------------------------------------------------------------
         '- Контекст обработки телеметрии
         '---------------------------------------------------------------------
-        Container(DeviceTelemetry, \
-                  "Телеметрия", \
-                  $descr="Сбор, хранение, предоставление телеметрических данных")
-        ContainerDb(DeviceTelemetryDB, "База данных телеметрии")
-        Rel_R(DeviceTelemetry, DeviceTelemetryDB, "Хранит данные")
-        ContainerQueue(DeviceTelemetryBus, "Шина телеметрических данных", \
+        Container(Telemetry, "Телеметрия", \
+                  $descr="Сбор, хранение, выдача телеметрических данных")
+        ContainerDb(TelemetryDB, "База данных телеметрии")
+        Rel_R(Telemetry, TelemetryDB, "Хранит данные")
+        ContainerQueue(TelemetryBus, "Шина телеметрических данных", \
                        $descr="Очередь с событиями телеметрии")
 
         '---------------------------------------------------------------------
         '- Контекст управления пользователями
         '---------------------------------------------------------------------
-        Container(UsersService, \
-                  "Реестр пользователей", \
+        Container(Users, "Реестр пользователей", \
                   $descr="Регистрация пользователей, их удаление, хранение пользовательских данных")
         ContainerDb(UsersDB, "База данных пользователей")
-        Rel(UsersService, UsersDB, "Хранит данные")
+        Rel(Users, UsersDB, "Хранит данные")
 
         '---------------------------------------------------------------------
         '- Контекст управления размещением приборов
         '---------------------------------------------------------------------
-        Container(PlacementManager, \
-                  "Размещение приборов", \
+        Container(Placements, "Размещение приборов", \
                   $descr="Управление размещениями, привязка приборов к месту")
-        ContainerDb(PlacesDB, "База данных размещений")
-        Rel(PlacementManager, PlacesDB, "Хранит данные")
+        ContainerDb(PlacementsDB, "База данных размещений")
+        Rel(Placements, PlacementsDB, "Хранит данные")
     }
 
-    Rel_R(DeviceController, DeviceRegistry, "Получает сведения о приборе и его привязках к пользователю", "HTTPS")
-    Rel_L(DeviceRegistry, DeviceController, "Поиск приборов, подключенных к системе", "HTTPS")
-    Rel(DeviceController, DeviceTelemetryBus, "Публикует события телеметрии")
-    Rel_U(DeviceTelemetryBus, DeviceTelemetry, "Обрабатывает события телеметрии")
+    Rel_R(DevicesController, Devices, "Получает сведения о приборе и его привязках к пользователю", "HTTPS")
+    Rel_L(Devices, DevicesController, "Поиск приборов, подключенных к системе", "HTTPS")
+    Rel(DevicesController, TelemetryBus, "Публикует события телеметрии")
+    Rel_U(TelemetryBus, Telemetry, "Обрабатывает события телеметрии")
 
     System(Device, "Прибор экосистемы Тёплый Дом", $sprite="robot")
-    BiRel(DeviceController, Device, "Сервис посылает команды, прибор отправляет ответы и состояние", "MQTT")
+    BiRel(DevicesController, Device, "Управление приборами", "MQTT, HTTP, ...")
 
     System(Client, "Клиентское приложение", $sprite="robot", $type="Web, Android, iOS, Aurora")
 }
@@ -71,14 +65,14 @@ System_Boundary(warmhouseIoTEcosystem, "Экосистема Тёплый дом
 Person(User, "Пользователь")
 Rel(User, Client, "")
 
-Rel(Client, UsersService, "Регистрируется, авторизуется, аутентифицируется", "HTTPS")
-Rel(Client, DeviceRegistry, "Привязывает приборы к своей учётной записи, отвязывает их от неё, \
-                           задаёт дополнительные сведения", "HTTPS")
-Rel(Client, DeviceTelemetry, "Получает текущее состояние приборов, историю состояния", "HTTPS, WSS")
-Rel(Client, PlacementManager, "Задаёт места для размещения приборов, привязывает приборы к местам", "HTTPS")
-Rel(Client, DeviceController, "Управляет приборами", "HTTPS")
+Rel(Client, Users, "Регистрируется, авторизуется, аутентифицируется", "HTTPS")
+Rel(Client, Devices, "Привязывает приборы к своей учётной записи, отвязывает их от неё, \
+                      задаёт дополнительные сведения", "HTTPS")
+Rel(Client, Telemetry, "Получает текущее состояние приборов, историю состояния", "HTTPS, WSS")
+Rel(Client, Placements, "Задаёт места для размещения приборов, привязывает приборы к местам", "HTTPS")
+Rel(Client, DevicesController, "Управляет приборами", "HTTPS")
 
-Lay_U(DeviceController, DeviceRegistry)
-Lay_L(DeviceController, DeviceTelemetryBus)
+Lay_U(DevicesController, Device)
+Lay_L(DevicesController, TelemetryBus)
 
 @enduml

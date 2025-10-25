@@ -5,12 +5,10 @@
 HIDE_STEREOTYPE()
 
 
-Boundary(DevicesPlacement, "Размещение приборов") {
-    Component(PlacementsCRUDController, "PlacementsCRUDController",\
-              $descr="Создание и получение записей по размещениям")
-
-    Component(PlacementsModel, "PlacementsModel")
-
+Boundary(Placements, "Размещение приборов") {
+    Component(Controller, "Controller",\
+              $descr="Создание, изменение, удаление домов и комнат, привязка приборов к комнатам")
+    Component(Model, "Model")
 }
 
 Person(user, "Пользователь")
@@ -22,10 +20,10 @@ Boundary(clientApps, "Клиентские приложения") {
 Rel(user, clientMobileApp, "")
 Rel(user, clientWebApp, "")
 
-ComponentDb_Ext(PlacementsDb, "База данных размещений")
-Rel(PlacementsCRUDController, PlacementsModel, "Хранение данных")
-Rel(PlacementsModel, PlacementsDb, "Хранение данных")
-Rel(clientMobileApp, PlacementsCRUDController, "Управление размещениями", "HTTPS")
-Rel(clientWebApp, PlacementsCRUDController, "Управление размещениями", "HTTPS")
+ComponentDb_Ext(PlacementsDB, "База данных размещений")
+Rel(Controller, Model, "Хранение данных")
+Rel(Model, PlacementsDB, "Хранение данных")
+Rel(clientMobileApp, Controller, "Управление размещениями", "HTTPS")
+Rel(clientWebApp, Controller, "Управление размещениями", "HTTPS")
 
 @enduml
