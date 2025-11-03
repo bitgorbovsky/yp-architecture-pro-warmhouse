@@ -9,7 +9,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: './common.yaml#/components/schemas/DeviceState'
+            $ref: 'common.yaml#/components/schemas/DeviceState'
 
   responses:
     DeviceStateResponse:
@@ -17,7 +17,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: './common.yaml#/components/schemas/DeviceState'
+            $ref: 'common.yaml#/components/schemas/DeviceState'
 
 paths:
   /v1/control/{provider}/{protocol}/{address}:
@@ -25,86 +25,86 @@ paths:
       summary: Получение состояния прибора.
       description: Получение полного состояния прибора.
       parameters:
-        - $ref: './common.yaml#/components/parameters/ProviderParam'
-        - $ref: './common.yaml#/components/parameters/ProtocolParam'
-        - $ref: './common.yaml#/components/parameters/AddressParam'
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+        - $ref: 'common.yaml#/components/parameters/AddressParam'
       responses:
         "200":
           $ref: '#/components/responses/DeviceStateResponse'
         "401":
-          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
         "404":
           description: |
             Прибор не найден по переданным параметрам - не поддерживаются
             указанные провайдер или протокол, не находится по адресу, либо
             управление этим прибором не запущено.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
     post:
       summary: Запуск управления прибором
       description: |
         Создаёт сеанс управления прибором и запрашивает его начальное
         состояние.
       parameters:
-        - $ref: './common.yaml#/components/parameters/ProviderParam'
-        - $ref: './common.yaml#/components/parameters/ProtocolParam'
-        - $ref: './common.yaml#/components/parameters/AddressParam'
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+        - $ref: 'common.yaml#/components/parameters/AddressParam'
       responses:
         "201":
           $ref: '#/components/responses/DeviceStateResponse'
         "401":
-          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
         "404":
           description: |
             Прибор не найден по переданным параметрам - не поддерживаются
             указанные провайдер или протокол, не находится по адресу.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
     patch:
       summary: Установка целевого состояния прибора.
       description: Установка целевого состояния прибора.
       parameters:
-        - $ref: './common.yaml#/components/parameters/ProviderParam'
-        - $ref: './common.yaml#/components/parameters/ProtocolParam'
-        - $ref: './common.yaml#/components/parameters/AddressParam'
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+        - $ref: 'common.yaml#/components/parameters/AddressParam'
       requestBody:
         $ref: '#/components/requestBodies/DeviceTargetState'
       responses:
         "202":
           description: Команда принята на обработку.
-          $ref: './common.yaml#/components/responses/SuccessResponse'
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
         "401":
-          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
         "400":
           description: |
             Передано неправильное состояние или прибор не поддерживает атрибуты
             переданного состояния.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
         "403":
           description: Состояние прибора невозможно изменить.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
         "404":
           description: |
             Прибор не найден по переданным параметрам - не поддерживаются
             указанные провайдер или протокол, не находится по адресу.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
         "422":
           description: Прибор недоступен или не способен ответить на команду.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
     delete:
       summary: Останов управления прибором
       description: |
         Останавливает сеанс управления прибором и удаляет его состояние из
         системы.
       parameters:
-        - $ref: './common.yaml#/components/parameters/ProviderParam'
-        - $ref: './common.yaml#/components/parameters/ProtocolParam'
-        - $ref: './common.yaml#/components/parameters/AddressParam'
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+        - $ref: 'common.yaml#/components/parameters/AddressParam'
       responses:
         "200":
-          $ref: './common.yaml#/components/responses/SuccessResponse'
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
         "401":
-          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
         "404":
           description: |
             Прибор не найден по переданным параметрам - не поддерживаются
             указанные провайдер или протокол, не находится по адресу.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'

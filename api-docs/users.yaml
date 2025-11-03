@@ -149,12 +149,12 @@ paths:
         "403":
           description: |
             Превышено количество попыток неудачной авторизации.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
         "401":
           description: |
             Заявка на вход отклонена по причине неправильных данных для входа.
             (Не существует такого email в системе или неправильный пароль).
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
 
   /v1/authenticate/confirm:
     post:
@@ -175,7 +175,7 @@ paths:
           description: |
             Заявка на вход не найдена по токену или был предоставлен
             неправильный код подтверждения.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
 
   /v1/register:
     post:
@@ -195,12 +195,12 @@ paths:
             Предоставленные данные не соответствуют правилам. Введён либо
             недоступный email, либо введён пароль, не соответствующий заданным
             правилам безопасности.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
         "409":
           description: |
             Новая учётная запись не может быть создана, так как уже существует
             учётная запись с таким же email.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
 
   /v1/register/confirm:
     post:
@@ -217,7 +217,7 @@ paths:
           description: |
             Не найдена учётная запись по предоставленным токену и коду
             подтверждения.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
 
   /v1/password:
     put:
@@ -227,12 +227,12 @@ paths:
         $ref: '#/components/requestBodies/PasswordChange'
       responses:
         "200":
-          $ref: './common.yaml#/components/responses/SuccessResponse'
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
         "403":
           description: |
             Пароль не может быть изменён, так как не соответствует правилам
             безопасности.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
 
   /v1/password/recovery:
     post:
@@ -249,10 +249,10 @@ paths:
           $ref: '#/components/responses/RequestIdResponse'
         "403":
           description: Превышено количество попыток создания заявки на восстановления.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
         "404":
           description: Email в системе не найден, заявка не создана.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
 
   /v1/password/recovery/confirm:
     post:
@@ -267,7 +267,7 @@ paths:
           $ref: '#/components/responses/RequestIdResponse'
         "403":
           description: Ошибка восстановления пароля.
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
 
   /v1/profile:
     get:
@@ -279,7 +279,7 @@ paths:
           $ref: '#/components/responses/ProfileResponse'
         "401":
           description: Не предоставлен токен авторизации (Bearer)
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
     put:
       summary: Изменение информации в профиле пользователя
       description: |
@@ -292,7 +292,7 @@ paths:
           $ref: '#/components/responses/ProfileResponse'
         "401":
           description: Не предоставлен токен авторизации (Bearer)
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
     delete:
       summary: Удаление профиля пользователя.
       description: |
@@ -300,7 +300,7 @@ paths:
         и отзывает все выданные токены доступа.
       responses:
         "200":
-          $ref: './common.yaml#/components/responses/SuccessResponse'
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
         "401":
           description: Не предоставлен токен авторизации (Bearer)
-          $ref: './common.yaml#/components/responses/ErrorResponse'
+          $ref: 'common.yaml#/components/responses/ErrorResponse'

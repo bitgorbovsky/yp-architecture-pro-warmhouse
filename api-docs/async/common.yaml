@@ -1,0 +1,36 @@
+asyncapi: 3.0.0
+info:
+  title: Общие структуры, используемые в Async API сервисов Теплый дом
+  version: 0.0.1
+
+components:
+  schemas:
+    DeviceStateRecord:
+      schema:
+        type: object
+        properties:
+          device_id:
+            type: object
+            properties:
+              protocol:
+                type: string
+              provider:
+                type: string
+              address:
+                type: string
+          state:
+            $ref: '../common.yaml#/components/schemas/DeviceState'
+
+channels:
+  deviceState:
+    title: Шина событий телеметрии
+    summary: Шина событий телеметрии
+    description: |
+      Шина событий телеметрии. Каждое изменение состояния прибора,
+      зарегистрированное и захваченное системой (через множество поддерживаемых
+      протоколов), попадает в данную шину событий.
+    address: device_state
+    messages:
+      deviceState:
+        payload:
+          $ref: '#/components/schemas/DeviceStateRecord'
