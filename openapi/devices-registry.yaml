@@ -1,0 +1,185 @@
+openapi: 3.1.0
+info:
+  title: API реестра приборов
+  version: 0.0.1
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        address:
+          type: string
+        model:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    DeviceInfo:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Device'
+      properties:
+        provider:
+          type: string
+        protocol:
+          type: string
+
+    DeviceList:
+      type: array
+      items:
+        $ref: '#/components/schemas/DeviceInfo'
+
+  requestBodies:
+    Device:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Device'
+
+  responses:
+    DeviceListResponse:
+      description: |
+        Список приборов.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceList'
+
+    DeviceInfoResponse:
+      description: |
+        Данные по прибору пользователя.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceInfo'
+
+paths:
+  /v1/devices:
+    get:
+      summary: Получение списка приборов.
+      description: |
+        Получение полного списка приборов пользователя по всем поддерживаемым
+        провайдерам и протоколам.
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceListResponse'
+        "401":
+          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+
+  /v1/devices/{provider}:
+    get:
+      summary: Получение списка приборов.
+      description: |
+        Получение полного списка приборов пользователя по указанному провайдеру
+        и поддерживаемым им протоколам.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/ProviderParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceListResponse'
+        "401":
+          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: Указанный провайдер отсутствует в системе.
+          $ref: './common.yaml#/components/responses/ErrorResponse'
+
+  /v1/devices/{provider}/{protocol}:
+    get:
+      summary: Получение списка приборов.
+      description: |
+        Получение полного списка приборов пользователя по указанным провайдеру
+        и протоколу.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/ProviderParam'
+        - $ref: './common.yaml#/components/parameters/ProtocolParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceListResponse'
+        "401":
+          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: Указанные провайдер или протокол отсутствуют в системе.
+          $ref: './common.yaml#/components/responses/ErrorResponse'
+    post:
+      summary: Регистрация прибора в системе и его привязка к пользователю.
+      description: |
+        Регистрация прибора в системе для указанного провайдера и протокола.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/ProviderParam'
+        - $ref: './common.yaml#/components/parameters/ProtocolParam'
+      responses:
+        "201":
+          description: Регистрация прибора в системе.
+          $ref: '#/components/responses/DeviceInfoResponse'
+        "400":
+          $ref: './common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: Указан не поддерживаемый провайдер или протокол.
+          $ref: './common.yaml#/components/responses/ErrorResponse'
+      requestBody:
+        $ref: '#/components/requestBodies/Device'
+
+  /v1/devices/{provider}/{protocol}/{address}:
+    get:
+      summary: Получение информации по прибору.
+      description: |
+        Получение сведений по прибору, занесеённых в системе и привязанных к
+        пользователю.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/ProviderParam'
+        - $ref: './common.yaml#/components/parameters/ProtocolParam'
+        - $ref: './common.yaml#/components/parameters/AddressParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceInfoResponse'
+        "401":
+          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+          $ref: './common.yaml#/components/responses/ErrorResponse'
+    put:
+      summary: Изменение данных по прибору.
+      description: |
+        Изменение сведений по прибору, занесеённых в системе и привязанных к
+        пользователю.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/ProviderParam'
+        - $ref: './common.yaml#/components/parameters/ProtocolParam'
+        - $ref: './common.yaml#/components/parameters/AddressParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceInfoResponse'
+        "400":
+          $ref: './common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+        "404":
+          $ref: './common.yaml#/components/responses/ErrorResponse'
+      requestBody:
+        $ref: '#/components/requestBodies/Device'
+    delete:
+      summary: Отвязка прибора от пользователя и его удаление.
+      description: |
+        Прибор удаляется из списка приборов пользователя.
+      parameters:
+        - $ref: './common.yaml#/components/parameters/ProviderParam'
+        - $ref: './common.yaml#/components/parameters/ProtocolParam'
+        - $ref: './common.yaml#/components/parameters/AddressParam'
+      responses:
+        "200":
+          $ref: './common.yaml#/components/responses/SuccessResponse'
+        "401":
+          $ref: './common.yaml#/components/responses/AuthenticationErrorResponse'
+        "404":
+          $ref: './common.yaml#/components/responses/ErrorResponse'

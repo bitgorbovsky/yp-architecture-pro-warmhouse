@@ -1,0 +1,311 @@
+openapi: 3.1.0
+info:
+  title: API Управления размещением приборов
+  version: 0.0.1
+
+components:
+  schemas:
+    House:
+      type: object
+      required:
+      - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        address:
+          type: string
+        gps:
+          type: array
+          minItems: 2
+          maxItems: 2
+          prefixItems:
+            - type: number
+            - type: number
+
+    Room:
+      type: object
+      required:
+      - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+
+    DevicePlacement:
+      type: object
+      required:
+      - provider
+      - protocol
+      - address
+      properties:
+        id:
+          type: string
+        provider:
+          type: string
+        protocol:
+          type: string
+        address:
+          type: string
+
+    DevicePlacements:
+      type: array
+      items:
+        $ref: '#/components/schemas/DevicePlacement'
+
+    Houses:
+      type: array
+      items:
+        $ref: '#/components/schemas/House'
+
+    Rooms:
+      type: array
+      items:
+        $ref: '#/components/schemas/Room'
+
+  responses:
+    HousesResponse:
+      description: |
+        Список домов, заведенных пользователем в систему.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Houses'
+
+    HouseResponse:
+      description: |
+        Информация по дому, заведенному пользователем в систему.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/House'
+
+    RoomsResponse:
+      description: |
+        Список комнат в доме.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Rooms'
+
+    RoomResponse:
+      description: |
+        Информация по комнате дома, заведенном пользователем в систему.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Room'
+
+    DevicePlacementsResponse:
+      description: |
+        Список всех приборов, размещённых в комнате
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DevicePlacements'
+
+  requestBodies:
+    House:
+      description: |
+        Информация по размещаемому дому.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/House'
+
+    Room:
+      description: |
+        Информация по комнате.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Room'
+
+    DevicePlacement:
+      description: |
+        Размещение прибора
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DevicePlacement'
+
+  parameters:
+    HouseIdParam:
+      in: path
+      name: house_id
+      description: Идентификатор дома
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: integer
+
+    RoomIdParam:
+      in: path
+      name: room_id
+      description: Идентификатор комнаты
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: integer
+
+    PlacementIdParam:
+      in: path
+      name: placement_id
+      description: Идентификатор размещения прибора
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: integer
+
+paths:
+  /v1/houses:
+    get:
+      responses:
+        "200":
+          $ref: '#/components/responses/HousesResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/House'
+      responses:
+        "201":
+          description: Запись о доме успешно заведена в реестр размещений.
+          $ref: '#/components/responses/HouseResponse'
+        "400":
+          $ref: 'common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+
+  /v1/houses/{house_id}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/HouseResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+    put:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/House'
+      responses:
+        "200":
+          description: Информация по дому успешно обновлена
+          $ref: '#/components/responses/HouseResponse'
+        "400":
+          $ref: 'common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+    delete:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+      description: |
+        Удаляет дом, заведённый пользователем в систему, а также все комнаты,
+        связанные с домом и все размещения приборов.
+      responses:
+        "200":
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+
+  /v1/houses/{house_id}/rooms:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/RoomsResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/Room'
+      responses:
+        "201":
+          $ref: '#/components/responses/RoomResponse'
+        "400":
+          $ref: 'common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+
+  /v1/houses/{house_id}/rooms/{room_id}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+        - $ref: '#/components/parameters/RoomIdParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/RoomResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+    put:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+        - $ref: '#/components/parameters/RoomIdParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/RoomResponse'
+        "400":
+          $ref: 'common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+    delete:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+        - $ref: '#/components/parameters/RoomIdParam'
+      responses:
+        "200":
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+
+  /v1/houses/{house_id}/rooms/{room_id}/devices:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+        - $ref: '#/components/parameters/RoomIdParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DevicePlacementsResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+        - $ref: '#/components/parameters/RoomIdParam'
+      requestBody:
+        $ref: '#/components/requestBodies/DevicePlacement'
+      responses:
+        "200":
+          $ref: 'common.yaml#components/responses/SuccessResponse'
+        "400":
+          $ref: 'common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+        "409":
+          description: |
+            Прибор не можеть быть размещён одновременно в нескольких местах.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/houses/{house_id}/rooms/{room_id}/devices/{placement_id}:
+    delete:
+      parameters:
+        - $ref: '#/components/parameters/HouseIdParam'
+        - $ref: '#/components/parameters/RoomIdParam'
+        - $ref: '#/components/parameters/PlacementIdParam'
+      responses:
+        "200":
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'

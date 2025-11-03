@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: Общие структуры, используемые в API сервисов Теплый дом.
+  version: 0.0.1
+
+components:
+  schemas:
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+
+    Feature:
+      type: object
+      required:
+      - value
+      - type
+      - unit
+      properties:
+        type:
+          type: string
+        unit:
+          type: string
+        timestamp:
+          type: integer
+        childs:
+          type: 'object'
+          additionalProperties:
+            $ref: '#/components/schemas/Feature'
+        value: {}
+
+    DeviceState:
+      type: object
+      required:
+      - features
+      properties:
+        status:
+          enum:
+          - online
+          - offline
+          - active
+          - busy
+        timestamp:
+          type: integer
+        features:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Feature'
+
+  responses:
+    SuccessResponse:
+      description: |
+        Ответ на любую успешную операцию.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SuccessMessage'
+
+    ErrorResponse:
+      description: |
+        Ответ на некорректную операцию.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+
+    AuthenticationErrorResponse:
+      description: |
+        Не был предоставлен токен авторизации, сервер не может обработать
+        запрос.
+      $ref: '#/components/responses/ErrorResponse'
+
+    ValidationErrorResponse:
+      description: Валидация входных данных вернула ошибку.
+      $ref: '#/components/responses/ErrorResponse'
+
+    DeviceStateResponse:
+      description: Состояние прибора.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceState'
+
+  parameters:
+    ProviderParam:
+      in: path
+      name: provider
+      description: |
+        Идентификатор провайдера приборов.
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: string
+
+    ProtocolParam:
+      in: path
+      name: protocol
+      description: |
+        Идентификатор протокола приборов.
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: string
+
+    AddressParam:
+      in: path
+      name: address
+      description: |
+        Адрес прибора в части провайдера, обслуживающей заданный протокол.
+      required: true
+      schema:
+        type: string

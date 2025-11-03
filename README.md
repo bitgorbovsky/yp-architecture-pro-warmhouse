@@ -102,67 +102,76 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-[Контекст текущей системы](schemas/01.context.puml)
+[Контекст текущей системы](schemas/context.puml)
 
 # Задание 2. Проектирование микросервисной архитектуры
 
 **Диаграмма контейнеров (Containers)**
 
-[Контекст новой системы](schemas/02.containers.puml)
+[Контейнеры новой системы](schemas/containers.puml)
 
 **Диаграмма компонентов (Components)**
 
+- [Компоненты сервиса "Управление приборами"](schemas/services/devices-controller/components.puml)
+- [Компоненты сервиса "Реестр приборов"](schemas/services/devices-registry/components.puml)
+- [Компоненты сервиса "Размещение приборов"](schemas/services/devices-placement/components.puml)
+- [Компоненты сервиса "Телеметрия"](schemas/services/devices-telemetry/components.puml)
+- [Компоненты сервиса "Реестр пользователей(авторизация и аутентификация)"](schemas/services/users/components.puml)
 
 **Диаграмма кода (Code)**
 
+ - **Управление приборами**
+   - [Диаграмма кода компонента DeviceClient](schemas/services/devices-controller/code-device-client.puml)
+   - [Диаграмма кода компонента DeviceDigTwin](schemas/services/devices-controller/code-device-digtwin.puml)
+   - [Диаграмма кода компонента DeviceManager](schemas/services/devices-controller/code-device-manager.puml)
+   - [Диаграмма кода компонента DeviceMonitor](schemas/services/devices-controller/code-device-monitor.puml)
+- **Реестр приборов**
+  - [Диаграмма кода](schemas/services/devices-registry/code-devices-registry.puml)
+- **Телеметрия**
+  - [Диаграмма кода](schemas/services/devices-telemetry/code-devices-telemetry.puml)
+- **Размещение приборов**
+  - [Диаграмма кода](schemas/services/devices-placement/code-placements.puml)
 
 # Задание 3. Разработка ER-диаграммы
 
+- [ER-диаграмма](schemas/er.puml)
 
 # Задание 4. Создание и документирование API
 
 ### 1. Тип API
 
+Для взаимодействия с сервисами "Управление приборами", "Реестр приборов",
+"Реестр пользователей", "Размещение приборов" и "Телеметрия" используется
+синхронный стиль взаимодействия, на базе HTTP/REST.
+
+Критерии выбора:
+
+- Простота и доступность реализации на данном этапе развития системы.
+- Синхронная природа работы текущих приборов экосистемы - все поддерживаемые на
+  данный момент приборы работают по протоколам HTTP. С появлением асинхронных
+  протоколов, когда приборы будут являться активными агентами, которые сами
+  посылают отчёты о своём состоянии и событиях, произошедших с ними, следующим
+  шагом будет развитие системы в сторону асинхронного взаимодействия. На данном
+  этапе можно предположить пока простое синхронное взаимодействие.
+
+Для взаимодействия между сервисами "Управление приборами" и "Телеметрия"
+используется асинхронный, событийный стиль взаимодействия.
+
+Критерии выбора:
+
+- Необходимость масштабирования телеметрического сервиса для обработки большого
+  потока событий от приборов.
+
+Для интеграции текущего монолита будет использован синхронный стиль, с
+применением адаптеров к API микросервисов (подход постепенной замены
+микросервисов - Strangler Fig).
 
 ### 2. Документация API
 
 
 # Задание 5. Работа с docker и docker-compose
 
-1) сделать простое приложение temperature-api на любом удобном для вас языке программирования, которое при запросе /temperature?location= будет отдавать рандомное значение температуры.
-
-Locations - название комнаты, sensorId - идентификатор названия комнаты
-
-```
-	// If no location is provided, use a default based on sensor ID
-	if location == "" {
-		switch sensorID {
-		case "1":
-			location = "Living Room"
-		case "2":
-			location = "Bedroom"
-		case "3":
-			location = "Kitchen"
-		default:
-			location = "Unknown"
-		}
-	}
-
-	// If no sensor ID is provided, generate one based on location
-	if sensorID == "" {
-		switch location {
-		case "Living Room":
-			sensorID = "1"
-		case "Bedroom":
-			sensorID = "2"
-		case "Kitchen":
-			sensorID = "3"
-		default:
-			sensorID = "0"
-		}
-	}
-```
-
+- [temperature-api Dockerfile](apps/temperature-api/Dockerfile)
 
 # **Задание 6. Разработка MVP**
 

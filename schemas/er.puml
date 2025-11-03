@@ -1,0 +1,67 @@
+@startuml
+'#############################################################################
+'#                           ENTITIES                                        #
+'#############################################################################
+
+entity User <<entity>>
+entity House <<entity>>
+entity Room <<entity>>
+entity Device <<entity>>
+
+entity DeviceID <<value>> {
+    + protocol
+    + provider
+    + address
+}
+
+entity DeviceState <<value>>
+
+entity TelemetryRecord <<value>> {
+    + deviceId: DeviceID
+    + timestamp: Timestamp
+    + state: DeviceState
+}
+
+entity TelemetryHistory <<aggregate>>
+
+entity DeviceController <<service>>
+entity DeviceTelemetry <<service>>
+entity DeviceRepository <<repository>>
+entity HouseRepository <<repository>>
+entity RoomRepository <<repository>>
+
+'#############################################################################
+'#                           RELATIONS                                       #
+'#############################################################################
+
+Device "1" --> "*" DeviceState
+Device "1" --o "1" Room : размещается в
+
+DeviceController --> Device : управляет
+
+DeviceTelemetry --> TelemetryHistory : возвращает
+DeviceTelemetry --> TelemetryRecord : возвращает
+
+DeviceRepository ..> Device : управляет сведениями о приборе
+
+HouseRepository ..> House : управляет сведениями о домах пользователя
+
+RoomRepository ..> Room : управляет сведениями о конматах пользователя
+
+DeviceID "1" --> "1" Device : идентифицирует
+
+DeviceState "1" --* "1" TelemetryRecord
+
+Room "*" --* "1" House : входит в
+
+TelemetryRecord "1" --> "*" TelemetryHistory : содержится
+
+User "1" ..> "*" Device : владеет и управляет
+User "1" ..> "*" House: владеет
+User --> DeviceController: использует для управления приборами
+User --> DeviceTelemetry : использует для получения телеметрии
+User --> DeviceRepository : использует для регистрации приборов и получения сведений
+User --> HouseRepository : использует для регистрации своих домов
+User --> RoomRepository : использует для регистрации своих комнат и привяки приборов к ним
+
+@enduml
