@@ -21,6 +21,10 @@ components:
 
     Device:
       type: object
+      required:
+      - kind
+      - model
+      - serialnum
       properties:
         address:
           type: string
@@ -43,6 +47,13 @@ components:
       type: object
       allOf:
         - $ref: '#/components/schemas/Device'
+      required:
+      - provider
+      - protocol
+      - address
+      - kind
+      - model
+      - serialnum
       properties:
         provider:
           type: string

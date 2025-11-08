@@ -32,9 +32,9 @@ class Device(BaseModel):
     Device
     """ # noqa: E501
     address: Optional[StrictStr] = None
-    kind: Optional[StrictStr] = None
-    model: Optional[StrictStr] = None
-    serialnum: Optional[StrictStr] = None
+    kind: StrictStr
+    model: StrictStr
+    serialnum: StrictStr
     name: Optional[StrictStr] = None
     description: Optional[StrictStr] = None
     tags: Optional[List[StrictStr]] = None

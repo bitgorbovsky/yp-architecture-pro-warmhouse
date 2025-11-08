@@ -15,7 +15,7 @@
 from fastapi import FastAPI
 
 from service.apis.default_api import router as DefaultApiRouter
-from service.repository import db
+import service.repository as repository
 
 app = FastAPI(
     title="API реестра приборов",
@@ -24,4 +24,7 @@ app = FastAPI(
 )
 
 app.include_router(DefaultApiRouter)
-db.init_app(app)
+
+@app.on_event("startup")
+async def init():
+    await repository.init()

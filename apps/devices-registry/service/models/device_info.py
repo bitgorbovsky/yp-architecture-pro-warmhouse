@@ -32,14 +32,14 @@ class DeviceInfo(BaseModel):
     DeviceInfo
     """ # noqa: E501
     address: Optional[StrictStr] = None
-    kind: Optional[StrictStr] = None
-    model: Optional[StrictStr] = None
-    serialnum: Optional[StrictStr] = None
+    kind: StrictStr
+    model: StrictStr
+    serialnum: StrictStr
     name: Optional[StrictStr] = None
     description: Optional[StrictStr] = None
     tags: Optional[List[StrictStr]] = None
-    provider: Optional[StrictStr] = None
-    protocol: Optional[StrictStr] = None
+    provider: StrictStr
+    protocol: StrictStr
     __properties: ClassVar[List[str]] = ["address", "kind", "model", "serialnum", "name", "description", "tags", "provider", "protocol"]
 
     model_config = {
