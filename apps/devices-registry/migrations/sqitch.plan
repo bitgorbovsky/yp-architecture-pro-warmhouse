@@ -1,0 +1,4 @@
+%syntax-version=1.0.0
+%project=devices-registry
+
+001-init-schema 2025-11-08T15:33:30Z Ivan Bannikov <ibannikov@ibannikov-work> # Initial schema for devices-registry

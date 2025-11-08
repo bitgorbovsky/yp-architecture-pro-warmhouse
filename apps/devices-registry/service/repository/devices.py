@@ -112,20 +112,18 @@ async def get(provider, protocol, address) -> DeviceInfo:
 async def select(provider=None, protocol=None) -> List[DeviceInfo]:
     query = f'''
     {__select_fields}
-    WHERE TRUE
+    WHERE
     '''
 
     args = []
-    clauses = []
+    clauses = ['TRUE']
     if provider is not None:
         args.append(provider)
         clauses.append(f'provider = ${len(args)}')
     if protocol is not None:
         args.append(protocol)
         clauses.append(f'protocol = ${len(args)}')
-
-    where_clause = ' AND '.join(clauses)
-    query += (' AND ' + where_clause)
+    query += ' AND '.join(clauses)
 
     async with repository.do() as conn:
         return [

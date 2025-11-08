@@ -1,5 +1,6 @@
 -- Create the database if it doesn't exist
 CREATE DATABASE smarthome;
+CREATE DATABASE devices_registry;
 
 -- Connect to the database
 \c smarthome;
