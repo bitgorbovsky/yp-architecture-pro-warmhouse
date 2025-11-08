@@ -1,0 +1,411 @@
+openapi: 3.1.0
+info:
+  title: API реестра приборов
+  version: 0.0.1
+servers:
+- url: /
+paths:
+  /v1/devices:
+    get:
+      description: |
+        Получение полного списка приборов пользователя по всем поддерживаемым
+        провайдерам и протоколам.
+      operationId: v1_getAllDevices
+      responses:
+        "200":
+          $ref: "#/components/responses/DeviceListResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+      summary: Получение списка приборов.
+  /v1/devices/{provider}:
+    get:
+      description: |
+        Получение полного списка приборов пользователя по указанному провайдеру
+        и поддерживаемым им протоколам.
+      operationId: v1_getDevicesOfProvider
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          $ref: "#/components/responses/DeviceListResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+      summary: Получение списка приборов.
+  /v1/devices/{provider}/{protocol}:
+    get:
+      description: |
+        Получение полного списка приборов пользователя по указанным провайдеру
+        и протоколу.
+      operationId: v1_getDevicesOfProviderAndProtocol
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          $ref: "#/components/responses/DeviceListResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+      summary: Получение списка приборов.
+    post:
+      description: |
+        Регистрация прибора в системе для указанного провайдера и протокола.
+      operationId: v1_registerDevice
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        $ref: "#/components/requestBodies/Device"
+      responses:
+        "201":
+          $ref: "#/components/responses/DeviceInfoResponse"
+          description: Регистрация прибора в системе.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+      summary: Регистрация прибора в системе и его привязка к пользователю.
+  /v1/devices/{provider}/{protocol}/{address}:
+    delete:
+      description: |
+        Прибор удаляется из списка приборов пользователя.
+      operationId: v1_unregisterDevice
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Адрес прибора в части провайдера, обслуживающей заданный протокол.
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+      summary: Отвязка прибора от пользователя и его удаление.
+    get:
+      description: |
+        Получение сведений по прибору, занесеённых в системе и привязанных к
+        пользователю.
+      operationId: v1_getDeviceInfo
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Адрес прибора в части провайдера, обслуживающей заданный протокол.
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          $ref: "#/components/responses/DeviceInfoResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+      summary: Получение информации по прибору.
+    put:
+      description: |
+        Изменение сведений по прибору, занесеённых в системе и привязанных к
+        пользователю.
+      operationId: v1_updateDeviceInfo
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Адрес прибора в части провайдера, обслуживающей заданный протокол.
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        $ref: "#/components/requestBodies/Device"
+      responses:
+        "200":
+          $ref: "#/components/responses/DeviceInfoResponse"
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+          description: Валидация входных данных вернула ошибку.
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+      summary: Изменение данных по прибору.
+components:
+  requestBodies:
+    Device:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Device"
+  responses:
+    DeviceListResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DeviceList"
+      description: |
+        Список приборов.
+    DeviceInfoResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DeviceInfo"
+      description: |
+        Данные по прибору пользователя.
+    SuccessResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SuccessMessage"
+      description: |
+        Ответ на любую успешную операцию.
+    ErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessage"
+      description: |
+        Указан не поддерживаемый провайдер или протокол, или прибор не
+        найден по указанному адресу.
+    AuthenticationErrorResponse:
+      $ref: "#/components/responses/ErrorResponse"
+      description: |
+        Не был предоставлен токен авторизации, сервер не может обработать
+        запрос.
+  schemas:
+    SuccessMessage:
+      example:
+        message: message
+      properties:
+        message:
+          title: message
+          type: string
+      title: SuccessMessage
+    ErrorMessage:
+      example:
+        code: 0
+        message: message
+      properties:
+        message:
+          title: message
+          type: string
+        code:
+          title: code
+          type: integer
+      title: ErrorMessage
+    Device:
+      example:
+        address: address
+        serialnum: serialnum
+        kind: kind
+        name: name
+        description: description
+        model: model
+        tags:
+        - tags
+        - tags
+      properties:
+        address:
+          title: address
+          type: string
+        kind:
+          title: kind
+          type: string
+        model:
+          title: model
+          type: string
+        serialnum:
+          title: serialnum
+          type: string
+        name:
+          title: name
+          type: string
+        description:
+          title: description
+          type: string
+        tags:
+          items:
+            type: string
+          title: tags
+          type: array
+      title: Device
+    DeviceInfo:
+      allOf:
+      - $ref: "#/components/schemas/Device"
+      - properties:
+          provider:
+            type: string
+          protocol:
+            type: string
+        type: object
+        example: null
+      example:
+        protocol: protocol
+        address: address
+        serialnum: serialnum
+        provider: provider
+        kind: kind
+        name: name
+        description: description
+        model: model
+        tags:
+        - tags
+        - tags
+      title: DeviceInfo
+    DeviceList:
+      items:
+        $ref: "#/components/schemas/DeviceInfo"
+      type: array

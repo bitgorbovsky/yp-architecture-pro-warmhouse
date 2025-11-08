@@ -35,10 +35,22 @@ package warmhouse.device.registry.model {
         + ...
     }
 
+    enum DeviceType {
+        + thermostat
+        + thermometer
+        + bulb
+        + lock
+        + petfeeder
+        ...
+    }
+
     dataclass DeviceRecord {
         provider: Provider
         protocol: Protocol
         address: String
+        kind: DeviceType
+        model: String
+        serialnum: String
         user: String
         name: String
         description: String
@@ -51,5 +63,6 @@ Controller --> Repository : вызывает нужны методы
 Repository --> DeviceRecord : использует
 Protocol --* DeviceRecord
 Provider --* DeviceRecord
+DeviceType --* DeviceRecord
 
 @enduml
