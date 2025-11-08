@@ -6,6 +6,7 @@ from typing import List
 
 from asyncpg import Record
 from asyncpg.exceptions import UniqueViolationError
+import rfc3339
 
 from service import repository
 from service.models.device import Device
@@ -23,7 +24,9 @@ SELECT
     serialnum,
     name,
     description,
-    tags
+    tags,
+    created_at,
+    modified_at
 FROM
     devices
 '''
@@ -38,14 +41,22 @@ RETURNING
     serialnum,
     name,
     description,
-    tags
+    tags,
+    created_at,
+    modified_at
 '''
 
 
 class DeviceRecord(Record):
     @property
     def dto(self):
-        return DeviceInfo.from_dict(dict(self.items()))
+        row = dict(self.items())
+        row.update({
+            'created_at': rfc3339.rfc3339(self['created_at']),
+            'modified_at': rfc3339.rfc3339(self['modified_at'])
+        })
+
+        return DeviceInfo.from_dict(row)
 
 
 class DeviceException(Exception):

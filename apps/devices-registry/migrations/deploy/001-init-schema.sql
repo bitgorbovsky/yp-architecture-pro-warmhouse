@@ -27,10 +27,26 @@ CREATE TABLE public.devices (
     serialnum character varying NOT NULL,
     name character varying,
     description text,
-    tags character varying[]
+    tags character varying[],
+    created_at TIMESTAMP DEFAULT now() NOT NULL,
+    modified_at TIMESTAMP DEFAULT now() NOT NULL
 );
 ALTER TABLE ONLY public.devices
     ADD CONSTRAINT devices_pkey PRIMARY KEY (address, provider, protocol);
 ALTER TABLE public.devices OWNER TO iot;
+
+CREATE OR REPLACE FUNCTION device_update_modified_at()
+RETURNS trigger
+AS $$
+BEGIN
+    NEW.modified_at := now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER devices_update_trigger
+    BEFORE UPDATE ON public.devices
+    FOR EACH ROW
+    EXECUTE FUNCTION device_update_modified_at();
 
 COMMIT;

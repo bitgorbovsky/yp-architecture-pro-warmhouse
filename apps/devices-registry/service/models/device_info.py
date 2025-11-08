@@ -40,7 +40,9 @@ class DeviceInfo(BaseModel):
     tags: Optional[List[StrictStr]] = None
     provider: StrictStr
     protocol: StrictStr
-    __properties: ClassVar[List[str]] = ["address", "kind", "model", "serialnum", "name", "description", "tags", "provider", "protocol"]
+    created_at: Optional[StrictStr] = None
+    modified_at: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["address", "kind", "model", "serialnum", "name", "description", "tags", "provider", "protocol", "created_at", "modified_at"]
 
     model_config = {
         "populate_by_name": True,
@@ -99,7 +101,9 @@ class DeviceInfo(BaseModel):
             "description": obj.get("description"),
             "tags": obj.get("tags"),
             "provider": obj.get("provider"),
-            "protocol": obj.get("protocol")
+            "protocol": obj.get("protocol"),
+            "created_at": obj.get("created_at"),
+            "modified_at": obj.get("modified_at")
         })
         return _obj
 

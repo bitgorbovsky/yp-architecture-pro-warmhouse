@@ -419,6 +419,10 @@ components:
             type: string
           protocol:
             type: string
+          created_at:
+            type: string
+          modified_at:
+            type: string
         required:
         - protocol
         - provider
@@ -432,7 +436,9 @@ components:
         kind: kind
         name: name
         description: description
+        created_at: created_at
         model: model
+        modified_at: modified_at
         tags:
         - tags
         - tags
