@@ -43,6 +43,18 @@ components:
           items:
             type: string
 
+    DeviceUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
     DeviceInfo:
       type: object
       allOf:
@@ -71,6 +83,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Device'
+
+    DeviceUpdate:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceUpdate'
 
   responses:
     DeviceListResponse:
@@ -224,7 +242,7 @@ paths:
         "404":
           $ref: 'common.yaml#/components/responses/ErrorResponse'
       requestBody:
-        $ref: '#/components/requestBodies/Device'
+        $ref: '#/components/requestBodies/DeviceUpdate'
     delete:
       operationId: 'v1_unregisterDevice'
       summary: Отвязка прибора от пользователя и его удаление.

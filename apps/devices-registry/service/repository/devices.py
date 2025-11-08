@@ -8,8 +8,9 @@ from asyncpg import Record
 from asyncpg.exceptions import UniqueViolationError
 
 from service import repository
-from service.models.device_info import DeviceInfo
 from service.models.device import Device
+from service.models.device_info import DeviceInfo
+from service.models.device_update import DeviceUpdate
 
 
 __select_fields = '''
@@ -180,12 +181,12 @@ async def new(provider, protocol, device: Device) -> DeviceInfo:
             raise DeviceConflict()
 
 
-async def update(provider, protocol, address, device: Device) -> DeviceInfo:
+async def update(provider, protocol, address, device: DeviceUpdate) -> DeviceInfo:
     query = f'''
     UPDATE devices
     SET
         name = $4,
-        description = $5
+        description = $5,
         tags = $6
     WHERE (provider, protocol, address) =  ($1, $2, $3)
     {__returning}
@@ -200,8 +201,10 @@ async def update(provider, protocol, address, device: Device) -> DeviceInfo:
             device.name,
             device.description,
             device.tags,
-            record_class=DeviceInfo
+            record_class=DeviceRecord
         )
+        if not updated_device:
+            return
 
         return updated_device.dto
 

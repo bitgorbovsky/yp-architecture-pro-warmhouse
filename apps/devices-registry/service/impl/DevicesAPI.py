@@ -43,8 +43,15 @@ class DevicesAPI(BaseDefaultApi):
                 content={"message": "device with such identifiers exists"}
             )
 
-    async def v1_update_device_info(self, provider, protocol, address, device):
-        return await devices.update(provider, protocol, address, device)
+    async def v1_update_device_info(self, provider, protocol, address, device_update):
+        updated = await devices.update(provider, protocol, address, device_update)
+        if not updated:
+            return JSONResponse(status_code=404, content={
+                'message': 'no device with such identifier',
+                'code': 404
+            })
+
+        return updated
 
     async def v1_unregister_device(self, provider, protocol, address):
         ok = await devices.delete(provider, protocol, address)

@@ -262,7 +262,7 @@ paths:
           type: string
         style: simple
       requestBody:
-        $ref: "#/components/requestBodies/Device"
+        $ref: "#/components/requestBodies/DeviceUpdate"
       responses:
         "200":
           $ref: "#/components/responses/DeviceInfoResponse"
@@ -290,6 +290,11 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Device"
+    DeviceUpdate:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DeviceUpdate"
   responses:
     DeviceListResponse:
       content:
@@ -386,6 +391,26 @@ components:
       - model
       - serialnum
       title: Device
+    DeviceUpdate:
+      example:
+        name: name
+        description: description
+        tags:
+        - tags
+        - tags
+      properties:
+        name:
+          title: name
+          type: string
+        description:
+          title: description
+          type: string
+        tags:
+          items:
+            type: string
+          title: tags
+          type: array
+      title: DeviceUpdate
     DeviceInfo:
       allOf:
       - $ref: "#/components/schemas/Device"

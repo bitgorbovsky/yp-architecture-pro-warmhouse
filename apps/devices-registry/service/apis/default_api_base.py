@@ -7,6 +7,7 @@ from typing import List, Optional
 from typing_extensions import Annotated
 from service.models.device import Device
 from service.models.device_info import DeviceInfo
+from service.models.device_update import DeviceUpdate
 from service.models.error_message import ErrorMessage
 from service.models.success_message import SuccessMessage
 
@@ -66,7 +67,7 @@ class BaseDefaultApi:
         provider: Annotated[StrictStr, Field(description="Идентификатор провайдера приборов. ")],
         protocol: Annotated[StrictStr, Field(description="Идентификатор протокола приборов. ")],
         address: Annotated[StrictStr, Field(description="Адрес прибора в части провайдера, обслуживающей заданный протокол. ")],
-        device: Optional[Device],
+        device_update: Optional[DeviceUpdate],
     ) -> DeviceInfo:
         """Изменение сведений по прибору, занесеённых в системе и привязанных к пользователю. """
         ...

@@ -28,6 +28,7 @@ from typing import List, Optional
 from typing_extensions import Annotated
 from service.models.device import Device
 from service.models.device_info import DeviceInfo
+from service.models.device_update import DeviceUpdate
 from service.models.error_message import ErrorMessage
 from service.models.success_message import SuccessMessage
 
@@ -159,12 +160,12 @@ async def v1_update_device_info(
     provider: Annotated[StrictStr, Field(description="Идентификатор провайдера приборов. ")] = Path(..., description="Идентификатор провайдера приборов. "),
     protocol: Annotated[StrictStr, Field(description="Идентификатор протокола приборов. ")] = Path(..., description="Идентификатор протокола приборов. "),
     address: Annotated[StrictStr, Field(description="Адрес прибора в части провайдера, обслуживающей заданный протокол. ")] = Path(..., description="Адрес прибора в части провайдера, обслуживающей заданный протокол. "),
-    device: Optional[Device] = Body(None, description=""),
+    device_update: Optional[DeviceUpdate] = Body(None, description=""),
 ) -> DeviceInfo:
     """Изменение сведений по прибору, занесеённых в системе и привязанных к пользователю. """
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0]().v1_update_device_info(provider, protocol, address, device)
+    return await BaseDefaultApi.subclasses[0]().v1_update_device_info(provider, protocol, address, device_update)
 
 
 @router.delete(
