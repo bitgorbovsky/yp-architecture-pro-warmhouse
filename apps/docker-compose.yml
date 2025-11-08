@@ -17,7 +17,7 @@ services:
     networks:
       - smarthome-network
     volumes:
-    - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   temperature-api:
     build:
@@ -26,6 +26,43 @@ services:
     container_name: temperature-api
     networks:
       - smarthome-network
+
+  sqitch:
+    image: sqitch/sqitch:latest
+    networks:
+      - smarthome-network
+    environment:
+      - PGPASSWORD=iot
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./devices-registry/migrations:/repo
+    command:
+      - deploy
+      - db:pg://iot@postgres:5432/devices_registry
+
+  devices-registry:
+    build:
+      context: ./devices-registry
+      dockerfile: Dockerfile
+    container_name: devices-resgistry
+    networks:
+      - smarthome-network
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=iot
+      - DB_NAME=devices_registry
+      - DB_PASS=iot
+      - HTTP_PORT=8081
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      sqitch:
+        condition: service_completed_successfully
+    ports:
+      - "8081:8081"
 
   app:
     build:
