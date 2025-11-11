@@ -1,0 +1,16 @@
+.flake8
+openapi.yaml
+pyproject.toml
+service/apis/__init__.py
+service/apis/default_api.py
+service/apis/default_api_base.py
+service/impl/__init__.py
+service/models/__init__.py
+service/models/device_meta.py
+service/models/device_state.py
+service/models/error_message.py
+service/models/extra_models.py
+service/models/feature.py
+service/models/success_message.py
+service/security_api.py
+setup.cfg

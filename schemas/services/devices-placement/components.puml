@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+!include <C4/C4_Context>
+
+HIDE_STEREOTYPE()
+
+
+Boundary(Placements, "Размещение приборов") {
+    Component(Controller, "Controller",\
+              $descr="Создание, изменение, удаление домов и комнат, привязка приборов к комнатам")
+    Component(Model, "Model")
+}
+
+Person(user, "Пользователь")
+
+Boundary(clientApps, "Клиентские приложения") {
+    System(clientMobileApp, "Мобильное приложение", $type="Android, iOS, Aurora")
+    System(clientWebApp, "Web-приложение", $type="Web($mol)")
+}
+Rel(user, clientMobileApp, "")
+Rel(user, clientWebApp, "")
+
+ComponentDb_Ext(PlacementsDB, "База данных размещений")
+Rel(Controller, Model, "Хранение данных")
+Rel(Model, PlacementsDB, "Хранение данных")
+Rel(clientMobileApp, Controller, "Управление размещениями", "HTTPS")
+Rel(clientWebApp, Controller, "Управление размещениями", "HTTPS")
+
+@enduml

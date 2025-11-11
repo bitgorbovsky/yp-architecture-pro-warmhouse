@@ -1,0 +1,107 @@
+@startuml
+
+package warmhouse.device.client {
+    enum Protocol {
+        + MQTT
+        + CoAP
+        + HTTP
+        + ...
+    }
+
+    enum Provider {
+        + warmhouse
+        + ...
+    }
+
+    enum DeviceStatus {
+        + online
+        + offline
+        + active
+        + busy
+    }
+
+    enum MeasurableUnit {
+        + celsium
+        + ampers
+        + volts
+        + lumens
+        + ...
+    }
+
+    enum Type {
+        + int
+        + string
+        + enum
+        + ...
+    }
+
+    class DeviceID {
+        + provider: Provider
+        + protocol: Protocol
+        + address: String
+    }
+
+    class DeviceState {
+        + status: DeviceStatus
+        + timestamp: Timestamp
+        + features(): Feature[]
+    }
+
+    class Feature {
+        + name: String
+        + type: Type
+        + value: Any
+        + unit: MeasurableUnit
+        + timestamp: Timestamp
+        + childs: Feature[]
+    }
+
+    class CommandResult {
+        statusCode: integer
+        state: DeviceState
+    }
+
+    interface DeviceClient {
+        + provider: Provider
+        + protocol: Protocol
+        + init(address: String): DeviceState
+        + state(address: String): DeviceState
+        + apply(address: String, state: DeviceState): CommandResult
+        + onChange(deviceEventHandler: Function<String, DeviceState>)
+    }
+
+    class DeviceTuyaMQTTClient
+    class DeviceWarmhouseHTTPClient
+    class DeviceCoAPClient
+
+    class DeviceCommunicator <<module>> {
+        - clients: DeviceClient[]
+        + init(deviceId: DeviceID): DeviceState
+        + state(deviceId: DeviceID): DeviceState
+        + apply(deviceId: DeviceID, state: DeviceState): CommandResult
+        + onChange(deviceEventHandler: Function<DeviceID, DeviceState>)
+    }
+}
+
+DeviceTuyaMQTTClient ..|> DeviceClient
+DeviceWarmhouseHTTPClient ..|> DeviceClient
+DeviceCoAPClient ..|> DeviceClient
+DeviceClient "*" --* "1" DeviceCommunicator
+
+DeviceID --> Protocol
+DeviceID --> Provider
+
+Feature "1" --* "*" Feature
+MeasurableUnit --* Feature
+Type --* Feature
+
+Feature --* DeviceState
+DeviceState --* CommandResult
+DeviceID  --* DeviceState
+
+DeviceCommunicator --> DeviceID : использует
+DeviceCommunicator --> CommandResult : порождает
+DeviceCommunicator --> DeviceState: порождает
+DeviceState --> DeviceStatus
+
+@enduml

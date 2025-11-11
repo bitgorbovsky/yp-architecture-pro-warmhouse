@@ -1,0 +1,82 @@
+openapi: 3.1.0
+info:
+  title: API Телеметрии приборов
+  version: 0.0.1
+
+components:
+  responses:
+    DeviceStateHistoryResponse:
+      description: История состояния прибора
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: 'common.yaml#/components/schemas/DeviceState'
+
+  parameters:
+    PageNumberParam:
+      name: page
+      in: query
+      description: |
+        Номер запрашиваемой страницы списка.
+      allowEmptyValue: false
+      schema:
+        type: integer
+
+    PageSizeParam:
+      name: size
+      in: query
+      description: |
+        Ограничение размера запрашиваемых списков.
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: integer
+
+    SinceParam:
+      name: since
+      in: query
+      description: |
+        Указывает, с какого момента времени запрашивать телеметрические данные.
+        По умолчанию с момента появления первых телеметрических данных.
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: integer
+
+    ToParam:
+      name: to
+      in: query
+      description: |
+        Указывает, по какой момент времени запрашивать телеметрические данные.
+        По умолчанию - по текущий момент
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: integer
+
+paths:
+  /v1/telemetry/{provider}/{protocol}/{address}:
+    get:
+      summary: Получение истории состояния прибора.
+      description: Получение полной истории состояния прибора.
+      parameters:
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+        - $ref: 'common.yaml#/components/parameters/AddressParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/PageNumberParam'
+        - $ref: '#/components/parameters/SinceParam'
+        - $ref: '#/components/parameters/ToParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceStateHistoryResponse'
+        "401":
+          $ref: 'common.yaml#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: |
+            Прибор не найден по переданным параметрам - не поддерживаются
+            указанные провайдер или протокол, не находится по адресу, либо
+            управление этим прибором не запущено.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'

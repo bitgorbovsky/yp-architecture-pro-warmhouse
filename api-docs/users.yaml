@@ -1,0 +1,306 @@
+openapi: 3.1.0
+info:
+  title: API реестра пользователей, системы авторизации и аутентификации
+  version: 0.0.1
+components:
+  schemas:
+    RequestIdMessage:
+      type: object
+      properties:
+        request_id:
+          type: string
+
+    ConfirmationMessage:
+      type: object
+      properties:
+        request_id:
+          type: string
+        code:
+          type: string
+
+    ConfirmPassChangeMessage:
+      type: object
+      properties:
+        request_id:
+          type: string
+        code:
+          type: string
+        new_password:
+          type: string
+
+    AuthTokenMessage:
+      type: object
+      properties:
+        auth_token:
+          type: string
+        refresh_token:
+          type: string
+
+    CredentialsMessage:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    ChangePasswordMessage:
+      type: object
+      properties:
+        old:
+          type: string
+        new:
+          type: string
+
+    PasswordRecoveryMessage:
+      type: object
+      properties:
+        email:
+          type: string
+
+    Profile:
+      type: object
+      properties:
+        email:
+          type: string
+        birthdate:
+          type: string
+        gender:
+          type: string
+
+  requestBodies:
+    Credentials:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CredentialsMessage'
+
+    Confirmation:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConfirmationMessage'
+
+    ConfirmationPassChange:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConfirmPassChangeMessage'
+
+    PasswordChange:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ChangePasswordMessage'
+
+    PasswordRecovery:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PasswordRecoveryMessage'
+
+  responses:
+    RequestIdResponse:
+      description: |
+        Сообщение с номером заявки (на регистрацию, на смену пароля,
+        восстановление пароля, подтверждение сессии).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RequestIdMessage'
+
+    AuthTokenResponse:
+      description: |
+        Сообщение с результатом успешной авторизации. Содержит основной
+        авторизационный токен (Bearer) и токен для обновления.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthTokenMessage'
+
+    ProfileResponse:
+      description: |
+        Содержит профиль пользователя со всеми его атрибутами
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profile'
+
+paths:
+  /v1/authenticate:
+    post:
+      summary: Создание заявки на вход в систему
+      description: |
+        Регистрирует заявку на вход в систему, опираясь на предоставленные
+        данные для входа (email и пароль). Если данные для входа правильные и
+        соответствующая учётная запись есть в системе, то пользователь получает
+        ответ 201 с токеном для подтверждения создаваемой сессии, а также
+        пользователю будет отослано письмо с кодом для подтверждения входа.
+        Токен и код подтверждения должны быть использованы в запросе для
+        подтверждения входа.
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+      responses:
+        "201":
+          description: |
+            Заявка на вход успешно создана, выдан токен для подтверждения и
+            отослано письмо с кодом подтверждения.
+          $ref: '#/components/responses/RequestIdResponse'
+        "403":
+          description: |
+            Превышено количество попыток неудачной авторизации.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+        "401":
+          description: |
+            Заявка на вход отклонена по причине неправильных данных для входа.
+            (Не существует такого email в системе или неправильный пароль).
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/authenticate/confirm:
+    post:
+      summary: Подтверждение заявок на вход в систему
+      description: |
+        Подтверждает заявку на вход в систему, используя предоставленные токен
+        и код подтверждения.
+      requestBody:
+        $ref: '#/components/requestBodies/Confirmation'
+      responses:
+        "200":
+          description: |
+            Заявка на вход найдена по токену и подтверждена кодом; создаётся
+            новая сессия и в ответе выдаются токены для авторизации и
+            обновления сессии.
+          $ref: '#/components/responses/AuthTokenResponse'
+        "404":
+          description: |
+            Заявка на вход не найдена по токену или был предоставлен
+            неправильный код подтверждения.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/register:
+    post:
+      summary: Создание новой учётной записи
+      description: |
+        Создаёт новую учётную запись в системе, в неактивном состоянии.
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+      responses:
+        "201":
+          description: |
+            Учётная запись успешно создана, получен токен подтверждения и
+            отправлено письмо с кодом подтверждения регистрации.
+          $ref: '#/components/responses/RequestIdResponse'
+        "403":
+          description: |
+            Предоставленные данные не соответствуют правилам. Введён либо
+            недоступный email, либо введён пароль, не соответствующий заданным
+            правилам безопасности.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+        "409":
+          description: |
+            Новая учётная запись не может быть создана, так как уже существует
+            учётная запись с таким же email.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/register/confirm:
+    post:
+      summary: Подтверждение создания учётной записи и её активация
+      description: |
+        Подтверждение регистрации учётной записи и её активация.
+      requestBody:
+        $ref: '#/components/requestBodies/Confirmation'
+      responses:
+        "200":
+          description: |
+            Учётная запись подтверждена и активирована.
+        "404":
+          description: |
+            Не найдена учётная запись по предоставленным токену и коду
+            подтверждения.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/password:
+    put:
+      summary: Изменение пароля
+      description: Изменение пароля.
+      requestBody:
+        $ref: '#/components/requestBodies/PasswordChange'
+      responses:
+        "200":
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
+        "403":
+          description: |
+            Пароль не может быть изменён, так как не соответствует правилам
+            безопасности.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/password/recovery:
+    post:
+      summary: Создание заявки на восстановление пароля.
+      description: |
+        Создание заявки на восстановление пароля. На вход требует email, и если
+        такой email есть в системе, то пользователь на этот email получает
+        письмо с кодом подтверждения.
+      requestBody:
+        $ref: '#/components/requestBodies/PasswordRecovery'
+      responses:
+        "200":
+          description: Заявка успешно создана, выслано письмо с кодом подтверждения.
+          $ref: '#/components/responses/RequestIdResponse'
+        "403":
+          description: Превышено количество попыток создания заявки на восстановления.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+        "404":
+          description: Email в системе не найден, заявка не создана.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/password/recovery/confirm:
+    post:
+      summary: Подтверждение зявки на восстановление пароля.
+      description: |
+        Подтверждение заявки на восстановление пароля.
+      requestBody:
+        $ref: '#/components/requestBodies/ConfirmationPassChange'
+      responses:
+        "200":
+          description: Пароль успешно изменён
+          $ref: '#/components/responses/RequestIdResponse'
+        "403":
+          description: Ошибка восстановления пароля.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/profile:
+    get:
+      summary: Получение информации по профилю пользователя
+      description: Получение информации по профилю пользователя
+      responses:
+        "200":
+          description: Выдача информации по профилю пользователя
+          $ref: '#/components/responses/ProfileResponse'
+        "401":
+          description: Не предоставлен токен авторизации (Bearer)
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+    put:
+      summary: Изменение информации в профиле пользователя
+      description: |
+        Позволяет изменять следующие атрибуты профиля пользователя:
+          * birthdate
+          * gender
+      responses:
+        "200":
+          description: Данные профиля изменены
+          $ref: '#/components/responses/ProfileResponse'
+        "401":
+          description: Не предоставлен токен авторизации (Bearer)
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+    delete:
+      summary: Удаление профиля пользователя.
+      description: |
+        Деактивирует учётную запись пользователя, завершает все созданные сесии
+        и отзывает все выданные токены доступа.
+      responses:
+        "200":
+          $ref: 'common.yaml#/components/responses/SuccessResponse'
+        "401":
+          description: Не предоставлен токен авторизации (Bearer)
+          $ref: 'common.yaml#/components/responses/ErrorResponse'

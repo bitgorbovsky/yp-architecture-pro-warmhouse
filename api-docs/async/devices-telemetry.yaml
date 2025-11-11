@@ -1,0 +1,14 @@
+asyncapi: 3.0.0
+info:
+  title: Асинхронное API сервиса "Телеметрия приборов"
+  version: 0.0.1
+  description: |
+    Описание асинхронного API сервиса "Телеметрия приборов". Сервис
+    обрабатывает поток телеметрических данных, поступающих от сервиса
+    "Управление приборами" и складывает их в хранилище.
+
+operations:
+  onDeviceStateChanged:
+    action: receive
+    channel:
+      $ref: 'common.yaml#/channels/deviceState'

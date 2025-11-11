@@ -1,0 +1,26 @@
+@startuml
+
+package warmhouse.device.monitor {
+    class DeviceMonitor {
+        + cron: CRON
+        + check(deviceId: DeviceID)
+    }
+}
+
+package warmhouse.device.digtwin {
+    class DeviceDigTwin {
+        + apply(deviceId: DeviceID, state: DeviceState)
+        + devices(since: Timestamp, to: Timestamp): DeviceID[]
+    }
+}
+
+package warmhouse.device.client {
+    class DeviceClient {
+        + state(deviceId: DeviceID): DeviceState
+    }
+}
+
+DeviceMonitor --> DeviceDigTwin
+DeviceMonitor --> DeviceClient
+
+@enduml

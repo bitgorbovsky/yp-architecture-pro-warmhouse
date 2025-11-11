@@ -1,0 +1,265 @@
+openapi: 3.1.0
+info:
+  title: API реестра приборов
+  version: 0.0.1
+
+components:
+  schemas:
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+
+    Device:
+      type: object
+      required:
+      - kind
+      - model
+      - serialnum
+      properties:
+        address:
+          type: string
+        kind:
+          type: string
+        model:
+          type: string
+        serialnum:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    DeviceUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    DeviceInfo:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Device'
+      required:
+      - provider
+      - protocol
+      - address
+      - kind
+      - model
+      - serialnum
+      properties:
+        provider:
+          type: string
+        protocol:
+          type: string
+        created_at:
+          type: string
+        modified_at:
+          type: string
+
+    DeviceList:
+      type: array
+      items:
+        $ref: '#/components/schemas/DeviceInfo'
+
+  requestBodies:
+    Device:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Device'
+
+    DeviceUpdate:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceUpdate'
+
+  responses:
+    DeviceListResponse:
+      description: |
+        Список приборов.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceList'
+
+    DeviceInfoResponse:
+      description: |
+        Данные по прибору пользователя.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeviceInfo'
+
+    SuccessResponse:
+      description: |
+        Ответ на любую успешную операцию.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SuccessMessage'
+
+    ErrorResponse:
+      description: |
+        Ответ на некорректную операцию.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+
+    AuthenticationErrorResponse:
+      description: |
+        Не был предоставлен токен авторизации, сервер не может обработать
+        запрос.
+      $ref: '#/components/responses/ErrorResponse'
+
+paths:
+  /v1/devices:
+    get:
+      operationId: 'v1_getAllDevices'
+      summary: Получение списка приборов.
+      description: |
+        Получение полного списка приборов пользователя по всем поддерживаемым
+        провайдерам и протоколам.
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceListResponse'
+        "401":
+          $ref: '#/components/responses/AuthenticationErrorResponse'
+
+  /v1/devices/{provider}:
+    get:
+      operationId: 'v1_getDevicesOfProvider'
+      summary: Получение списка приборов.
+      description: |
+        Получение полного списка приборов пользователя по указанному провайдеру
+        и поддерживаемым им протоколам.
+      parameters:
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceListResponse'
+        "401":
+          $ref: '#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: Указанный провайдер отсутствует в системе.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+
+  /v1/devices/{provider}/{protocol}:
+    get:
+      operationId: 'v1_getDevicesOfProviderAndProtocol'
+      summary: Получение списка приборов.
+      description: |
+        Получение полного списка приборов пользователя по указанным провайдеру
+        и протоколу.
+      parameters:
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceListResponse'
+        "401":
+          $ref: '#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: Указанные провайдер или протокол отсутствуют в системе.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+    post:
+      operationId: 'v1_registerDevice'
+      summary: Регистрация прибора в системе и его привязка к пользователю.
+      description: |
+        Регистрация прибора в системе для указанного провайдера и протокола.
+      parameters:
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+      responses:
+        "201":
+          description: Регистрация прибора в системе.
+          $ref: '#/components/responses/DeviceInfoResponse'
+        "400":
+          $ref: 'common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: '#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: Указан не поддерживаемый провайдер или протокол.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+      requestBody:
+        $ref: '#/components/requestBodies/Device'
+
+  /v1/devices/{provider}/{protocol}/{address}:
+    get:
+      operationId: 'v1_getDeviceInfo'
+      summary: Получение информации по прибору.
+      description: |
+        Получение сведений по прибору, занесеённых в системе и привязанных к
+        пользователю.
+      parameters:
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+        - $ref: 'common.yaml#/components/parameters/AddressParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceInfoResponse'
+        "401":
+          $ref: '#/components/responses/AuthenticationErrorResponse'
+        "404":
+          description: |
+            Указан не поддерживаемый провайдер или протокол, или прибор не
+            найден по указанному адресу.
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+    put:
+      operationId: 'v1_updateDeviceInfo'
+      summary: Изменение данных по прибору.
+      description: |
+        Изменение сведений по прибору, занесеённых в системе и привязанных к
+        пользователю.
+      parameters:
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+        - $ref: 'common.yaml#/components/parameters/AddressParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/DeviceInfoResponse'
+        "400":
+          $ref: 'common.yaml#/components/responses/ValidationErrorResponse'
+        "401":
+          $ref: '#/components/responses/AuthenticationErrorResponse'
+        "404":
+          $ref: 'common.yaml#/components/responses/ErrorResponse'
+      requestBody:
+        $ref: '#/components/requestBodies/DeviceUpdate'
+    delete:
+      operationId: 'v1_unregisterDevice'
+      summary: Отвязка прибора от пользователя и его удаление.
+      description: |
+        Прибор удаляется из списка приборов пользователя.
+      parameters:
+        - $ref: 'common.yaml#/components/parameters/ProviderParam'
+        - $ref: 'common.yaml#/components/parameters/ProtocolParam'
+        - $ref: 'common.yaml#/components/parameters/AddressParam'
+      responses:
+        "200":
+          $ref: '#/components/responses/SuccessResponse'
+        "401":
+          $ref: '#/components/responses/AuthenticationErrorResponse'
+        "404":
+          $ref: 'common.yaml#/components/responses/ErrorResponse'

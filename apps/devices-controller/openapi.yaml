@@ -1,0 +1,346 @@
+openapi: 3.1.0
+info:
+  title: API управления приборами
+  version: 0.0.1
+servers:
+- url: /
+paths:
+  /v1/control/{provider}/{protocol}/{address}:
+    delete:
+      description: |
+        Останавливает сеанс управления прибором и удаляет его состояние из
+        системы.
+      operationId: v1DisconnectDevice
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Адрес прибора в части провайдера, обслуживающей заданный протокол.
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          $ref: "#/components/responses/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+          description: |
+            Прибор не найден по переданным параметрам - не поддерживаются
+            указанные провайдер или протокол, не находится по адресу.
+      summary: Останов управления прибором
+    get:
+      description: Получение полного состояния прибора.
+      operationId: v1InspectDevice
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Адрес прибора в части провайдера, обслуживающей заданный протокол.
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          $ref: "#/components/responses/DeviceStateResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+          description: |
+            Прибор не найден по переданным параметрам - не поддерживаются
+            указанные провайдер или протокол, не находится по адресу, либо
+            управление этим прибором не запущено.
+      summary: Получение состояния прибора.
+    patch:
+      description: Установка целевого состояния прибора.
+      operationId: v1RunDevice
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Адрес прибора в части провайдера, обслуживающей заданный протокол.
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        $ref: "#/components/requestBodies/DeviceTargetState"
+      responses:
+        "202":
+          $ref: "#/components/responses/SuccessResponse"
+          description: Команда принята на обработку.
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+          description: |
+            Передано неправильное состояние или прибор не поддерживает атрибуты
+            переданного состояния.
+        "403":
+          $ref: "#/components/responses/ErrorResponse"
+          description: Состояние прибора невозможно изменить.
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+          description: |
+            Прибор не найден по переданным параметрам - не поддерживаются
+            указанные провайдер или протокол, не находится по адресу.
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+          description: Прибор недоступен или не способен ответить на команду.
+      summary: Установка целевого состояния прибора.
+    post:
+      description: |
+        Создаёт сеанс управления прибором и запрашивает его начальное
+        состояние. Требует данных по модели прибора и его типу (а также
+        возможно и по серийному номеру) определить необходимый протокол
+        взаимодействия. Это сделано для того, чтобы поддерживать приборы,
+        которые не поддерживают рефлексию, с помощью которой можно выявить, по
+        каким протоколам можно взаимодействовать и какие функциональные
+        возможности есть. Для приборов, которые поддерживают рефлекцию, данная
+        информация может быть проигнорирована.
+      operationId: v1ConnectDevice
+      parameters:
+      - description: |
+          Идентификатор провайдера приборов.
+        explode: false
+        in: path
+        name: provider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Идентификатор протокола приборов.
+        explode: false
+        in: path
+        name: protocol
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          Адрес прибора в части провайдера, обслуживающей заданный протокол.
+        explode: false
+        in: path
+        name: address
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        $ref: "#/components/requestBodies/DeviceMeta"
+      responses:
+        "201":
+          $ref: "#/components/responses/DeviceStateResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+          description: |
+            Прибор не найден по переданным параметрам - не поддерживаются
+            указанные провайдер или протокол, не находится по адресу.
+        "409":
+          $ref: "#/components/responses/ErrorResponse"
+          description: |
+            Сессия управления для данного прибора уже запущена.
+      summary: Запуск управления прибором
+components:
+  requestBodies:
+    DeviceTargetState:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DeviceState"
+    DeviceMeta:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DeviceMeta"
+  responses:
+    SuccessResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SuccessMessage"
+      description: |
+        Ответ на любую успешную операцию.
+    ErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessage"
+      description: |
+        Ответ на некорректную операцию.
+    DeviceStateResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DeviceState"
+      description: Состояние прибора.
+    AuthenticationErrorResponse:
+      $ref: "#/components/responses/ErrorResponse"
+      description: |
+        Не был предоставлен токен авторизации, сервер не может обработать
+        запрос.
+  schemas:
+    SuccessMessage:
+      example:
+        message: message
+      properties:
+        message:
+          title: message
+          type: string
+      title: SuccessMessage
+    ErrorMessage:
+      example:
+        code: 1
+        message: message
+      properties:
+        message:
+          title: message
+          type: string
+        code:
+          title: code
+          type: integer
+      title: ErrorMessage
+    Feature:
+      example:
+        unit: unit
+        type: type
+        childs:
+          key: null
+        value: ""
+        timestamp: 6
+      properties:
+        type:
+          title: type
+          type: string
+        unit:
+          title: unit
+          type: string
+        timestamp:
+          title: timestamp
+          type: integer
+        childs:
+          additionalProperties:
+            $ref: "#/components/schemas/Feature"
+          title: childs
+        value:
+          title: value
+      required:
+      - type
+      - unit
+      - value
+      title: Feature
+    DeviceState:
+      example:
+        features:
+          key:
+            unit: unit
+            type: type
+            childs:
+              key: null
+            value: ""
+            timestamp: 6
+        status: online
+        timestamp: 0
+      properties:
+        status:
+          enum:
+          - online
+          - offline
+          - active
+          - busy
+          title: status
+          type: string
+        timestamp:
+          title: timestamp
+          type: integer
+        features:
+          additionalProperties:
+            $ref: "#/components/schemas/Feature"
+          title: features
+      required:
+      - features
+      title: DeviceState
+    DeviceMeta:
+      example:
+        serialnum: serialnum
+        kind: kind
+        model: model
+      properties:
+        kind:
+          title: kind
+          type: string
+        model:
+          title: model
+          type: string
+        serialnum:
+          title: serialnum
+          type: string
+      required:
+      - kind
+      - model
+      - serialnum
+      title: DeviceMeta

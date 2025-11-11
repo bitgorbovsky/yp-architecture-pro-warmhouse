@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Component>
+!include <C4/C4_Context>
+
+HIDE_STEREOTYPE()
+
+
+Boundary(DevicesRegistryService, "Реестр приборов") {
+    Component(Controller, "Controller",\
+              $descr="Создание записей по приборам, получение данных по приборам")
+    Component(Model, "Model", \
+              $descr="Слой доступа к базе данных по приборам")
+
+    Rel(Controller, Model, "Чтение и запись данных пo приборам")
+}
+
+Person(User, "Пользователь")
+
+Boundary(clientApps, "Клиентские приложения") {
+    System(clientMobileApp, "Мобильное приложение", $type="Android, iOS, Aurora")
+    System(clientWebApp, "Web-приложение", $type="Web($mol)")
+}
+Rel(User, clientMobileApp, "")
+Rel(User, clientWebApp, "")
+
+ComponentDb_Ext(DevicesDB, "База данных приборов")
+Rel(Model, DevicesDB, "Хранение данных")
+
+Rel(clientMobileApp, Controller, "Получение и изменение данных по приборам")
+Rel(clientWebApp, Controller, "Получение и изменение данных по приборам")
+
+@enduml

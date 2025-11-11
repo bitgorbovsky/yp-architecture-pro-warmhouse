@@ -1,0 +1,68 @@
+@startuml
+
+package warmhouse.placements.controller {
+    class HouseController {
+        + list(user: String): House[]
+        + get(user: String, houseId: int): House
+        + upsert(user: String, house: House): House
+        + delete(user: String, houseId: int)
+    }
+
+    class RoomController {
+        + list(user: String, houseId: int): Room[]
+        + get(user: String, roomId: int): Room
+        + upsert(user: String, room: Room): Room
+        + delete(user: String, roomId: int)
+        + placeDevice(user: String, roomId: int, deviceId: DeviceID)
+    }
+}
+
+package warmhouse.placements.repository {
+    class HouseRepository {
+        + list(user: String): House[]
+        + get(user: String, houseId: int): House
+        + upsert(user: String, house: House): House
+        + delete(user: String, houseId: int)
+    }
+
+    class RoomRepository {
+        + list(user: String, houseId: int): Room[]
+        + get(user: String, roomId: int): Room
+        + upsert(user: String, room: Room): Room
+        + delete(user: String, roomId: int)
+        + placeDevice(user: String, roomId: int, deviceId: DeviceID)
+    }
+}
+
+package warmhouse.placements.model {
+    dataclass House {
+        + id: int
+        + user: String
+        + name: String
+        + description: String
+        + address: String
+        + position: Geoposition
+    }
+
+    dataclass Room {
+        + id: int
+        + user: String
+        + name: String
+        + description: String
+        + houseId: int
+    }
+
+    record DeviceToRoom {
+        + deviceID: DeviceID
+        + roomId: int
+    }
+}
+
+HouseController --> HouseRepository
+RoomController --> RoomRepository
+
+HouseRepository --> House
+RoomRepository --> Room
+RoomRepository --> DeviceToRoom
+
+@enduml

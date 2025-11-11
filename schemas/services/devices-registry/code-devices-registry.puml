@@ -1,0 +1,68 @@
+@startuml
+
+package warmhouse.device.registry.controller {
+    class Controller {
+        + list(user: String): DeviceRecord[]
+        + list(user: String, provider: Provider): DeviceRecord[]
+        + list(user: String, provider: Provider, protocol: Protocol): DeviceRecord[]
+        + get(user: String, deviceId: DeviceID): DeviceRecord
+        + upsert(user: String, deviceID: DeviceID, device: DeviceRecord): DeviceRecord
+        + delete(user: String, deviceID: DeviceID)
+    }
+}
+
+package warmhouse.device.registry.repository {
+    class Repository {
+        + list(user: String): DeviceRecord[]
+        + list(user: String, provider: Provider): DeviceRecord[]
+        + list(user: String, provider: Provider, protocol: Protocol): DeviceRecord[]
+        + get(user: String, deviceId: DeviceID): DeviceRecord
+        + upsert(user: String, deviceID: DeviceID, device: DeviceRecord): DeviceRecord
+        + delete(user: String, deviceID: DeviceID)
+    }
+}
+
+package warmhouse.device.registry.model {
+    enum Protocol {
+        + MQTT
+        + CoAP
+        + HTTP
+        + ...
+    }
+
+    enum Provider {
+        + warmhouse
+        + ...
+    }
+
+    enum DeviceType {
+        + thermostat
+        + thermometer
+        + bulb
+        + lock
+        + petfeeder
+        ...
+    }
+
+    dataclass DeviceRecord {
+        provider: Provider
+        protocol: Protocol
+        address: String
+        kind: DeviceType
+        model: String
+        serialnum: String
+        user: String
+        name: String
+        description: String
+        modelId: String
+        serialNumber: String
+    }
+}
+
+Controller --> Repository : вызывает нужны методы
+Repository --> DeviceRecord : использует
+Protocol --* DeviceRecord
+Provider --* DeviceRecord
+DeviceType --* DeviceRecord
+
+@enduml

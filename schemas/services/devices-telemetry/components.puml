@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+!include <C4/C4_Context>
+
+
+Boundary(Telemetry, "Телеметрия") {
+    Component(Controller, "Controller", $descr="Выдача телеметрии пользователю")
+    Component(TelemetryModel, "TelemetryModel", \
+              $descr="Набор моделей для хранения телеметрических данных приборов")
+    Component(TelemetryConsumer, "TelemetryConsumer", \
+              $descr="Читает шину с телеметрией")
+}
+
+ComponentDb_Ext(TelemetryDB, "TelemetryDB")
+ComponentQueue_Ext(TelemetryBus, "TelemetryBus")
+
+Person(User, "Пользователь")
+
+Boundary(clientApps, "Клиентские приложения") {
+    System(clientMobileApp, "Мобильное приложение", $type="Android, iOS, Aurora")
+    System(clientWebApp, "Web-приложение", $type="Web($mol)")
+}
+Rel(User, clientMobileApp, "")
+Rel(User, clientWebApp, "")
+
+Rel(clientMobileApp, Controller, "GET", "HTTPS")
+Rel(clientWebApp, Controller, "GET", "HTTPS")
+Rel(Controller, TelemetryModel, "Чтение")
+Rel(TelemetryModel, TelemetryDB, "Чтение и запись")
+Rel(TelemetryBus, TelemetryConsumer, "Чтение потока телеметрии", "")
+Rel(TelemetryConsumer, TelemetryModel, "Запись")
+
+@enduml

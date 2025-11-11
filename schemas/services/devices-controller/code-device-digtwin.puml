@@ -1,0 +1,35 @@
+@startuml
+
+package warmhouse.device.digtwin {
+    class DeviceDigTwinRepository {
+        + bind(deviceId: DeviceID, user: String)
+        + unbind(deviceId: DeviceID, user: String)
+        + state(deviceId: DeviceID): DeviceState
+        + apply(deviceId: DeviceID, state: DeviceState)
+        + devices(since: Timestamp, to: Timestamp): DeviceState[]
+    }
+
+    class StateMerger {
+        + old: DeviceState
+        + new: DeviceState
+        + hasDiff(): boolean
+        + merge(): DeviceState
+    }
+
+    class TelemetryQueue {
+        publish(state: DeviceState)
+    }
+}
+
+package warmhouse.device.client {
+    class DeviceState
+    class DeviceID
+}
+
+DeviceDigTwinRepository --> TelemetryQueue : публикация событий приборов
+DeviceDigTwinRepository --> StateMerger : cравнение и обновление состояний
+DeviceDigTwinRepository ..> DeviceState : использует в качестве основной структуры
+DeviceDigTwinRepository ..> DeviceID : основной способ идентификации приборов
+DeviceState "2" --o "1" StateMerger
+
+@enduml

@@ -4,10 +4,131 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: smarthome-postgres
-  ## тут нужно добавить настройки
+    environment:
+      POSTGRES_PASSWORD: iot
+      POSTGRES_USER: iot
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d smarthome -U iot" ]
+      interval: 10s
+      timeout: 1m
+      retries: 10
+    ports:
+      - "5432:5432"
+    networks:
+      - smarthome-network
+    volumes:
+      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command:
+    - "postgres"
+    - "-c"
+    - "wal_level=logical"
+    - "-c"
+    - "max_connections=500"
 
   temperature-api:
-  ## тут нужно добавить приложение
+    build:
+      context: ./temperature-api
+      dockerfile: Dockerfile
+    container_name: temperature-api
+    networks:
+      - smarthome-network
+
+  sqitch:
+    image: sqitch/sqitch:latest
+    networks:
+      - smarthome-network
+    environment:
+      - PGPASSWORD=iot
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./devices-registry/migrations:/repo
+    command:
+      - deploy
+      - db:pg://iot@postgres:5432/devices_registry
+
+  devices-registry:
+    build:
+      context: ./devices-registry
+      dockerfile: Dockerfile
+    container_name: devices-registry
+    networks:
+      - smarthome-network
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=iot
+      - DB_NAME=devices_registry
+      - DB_PASS=iot
+      - HTTP_PORT=8081
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      sqitch:
+        condition: service_completed_successfully
+    ports:
+      - "8081:8081"
+
+  devices-controller:
+    build:
+      context: ./devices-controller
+      dockerfile: Dockerfile
+    container_name: devices-controller
+    networks:
+      - smarthome-network
+    environment:
+      - HTTP_PORT=8081
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+
+  cdc:
+    image: debezium/server:3.0.0.Final
+    container_name: cdc
+    volumes:
+      - ./cdc/config:/debezium/config
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cdc-bus:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
+  cdc-bus:
+    image: redis:latest
+    container_name: cdc_bus
+    environment:
+      - REDIS_PASSWORD=iot
+      - REDIS_USER=iot
+      - REDIS_USER_PASSWORD=iot
+    ports:
+      - "6379:6379"
+    networks:
+      - smarthome-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  cdc-worker:
+    build:
+      context: ./cdc/worker
+      dockerfile: Dockerfile
+    environment:
+      - CDC_BUS_DB=0
+      - CDC_BUS_HOST=cdc-bus
+      - CDC_BUS_PORT=6379
+      - CDC_BUS_STREAM=warmhouse_devices.public.sensors
+      - DEVICES_REGISTRY_URL=http://devices-registry:8081
+    networks:
+      - smarthome-network
+    depends_on:
+      cdc-bus:
+        condition: service_healthy
 
   app:
     build:
@@ -20,7 +141,7 @@ services:
       temperature-api:
         condition: service_started
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
+      - DATABASE_URL=postgres://iot:iot@postgres:5432/smarthome
       - TEMPERATURE_API_URL=http://temperature-api:8081
     ports:
       - "8080:8080"
