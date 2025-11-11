@@ -162,6 +162,10 @@ paths:
             Прибор не найден по переданным параметрам - не поддерживаются
             указанные провайдер или протокол, не находится по адресу.
           $ref: '#/components/responses/ErrorResponse'
+        "409":
+          description: |
+            Сессия управления для данного прибора уже запущена.
+          $ref: '#/components/responses/ErrorResponse'
     patch:
       operationId: 'v1RunDevice'
       summary: Установка целевого состояния прибора.

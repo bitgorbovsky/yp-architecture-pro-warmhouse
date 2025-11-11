@@ -7,7 +7,7 @@ from service.device.client.common import DeviceID
 from service.device.client.device_emu import DeviceEmulator
 from service.models.device_meta import DeviceMeta
 from service.models.device_state import DeviceState
-from service.device.client.exceptions import NotSupportedDevice
+from service.device.client.exceptions import NotSupportedDevice, DeviceConflict
 
 
 class BaseDeviceClient(ABC):
@@ -25,6 +25,9 @@ class BaseDeviceClient(ABC):
         if emulator_class is None:
             raise NotSupportedDevice("this type of device is not supported by "
                                      "provider for chosen protocol")
+
+        if device_id in self.__emulators:
+            raise DeviceConflict("device is already run")
 
         emulator = emulator_class()
         self.__emulators[device_id] = emulator

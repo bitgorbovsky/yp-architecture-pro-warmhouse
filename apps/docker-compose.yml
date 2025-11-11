@@ -64,6 +64,19 @@ services:
     ports:
       - "8081:8081"
 
+  devices-controller:
+    build:
+      context: ./devices-controller
+      dockerfile: Dockerfile
+    container_name: devices-controller
+    networks:
+      - smarthome-network
+    environment:
+      - HTTP_PORT=8081
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+
   app:
     build:
       context: ./smart_home

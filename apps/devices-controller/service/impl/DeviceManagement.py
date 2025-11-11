@@ -10,13 +10,12 @@ from service.device.client import communicate_with
 from service.device.client.base_client import BaseDeviceClient
 from service.device.client.common import DeviceID
 from service.device.client.exceptions import (
-    NotSupportedProtocol,
-    NotSupportedProvider,
-    NotSupportedDevice,
-    DeviceException
+    DeviceException,
+    DeviceConflict
 )
 from service.models.device_meta import DeviceMeta
 from service.models.device_state import DeviceState
+from service.models.success_message import SuccessMessage
 
 
 class DeviceManagement(BaseDefaultApi):
@@ -29,6 +28,11 @@ class DeviceManagement(BaseDefaultApi):
             )
             client: BaseDeviceClient = communicate_with(device_id)
             return await client.init(device_id, meta)
+        except DeviceConflict as e:
+            return JSONResponse(status_code=409, content={
+                'message': e.args[0],
+                'code': 409
+            })
         except DeviceException as e:
             return JSONResponse(status_code=404, content={
                 'message': e.args[0],
@@ -71,7 +75,7 @@ class DeviceManagement(BaseDefaultApi):
                                'possibly device is not connected',
                     'code': 404
                 })
-            return await client.state(device_id)
+            return SuccessMessage(message="state applied")
         except DeviceException as e:
             return JSONResponse(status_code=404, content={
                 'message': e.args[0],

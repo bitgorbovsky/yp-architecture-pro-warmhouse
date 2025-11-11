@@ -9,6 +9,13 @@ class DeviceException(Exception):
     '''
 
 
+class DeviceConflict(DeviceException):
+    '''
+    Exception for various conflicts with devices:
+    already connected devices, inability to change state of device, ...
+    '''
+
+
 class WrongDeviceStateException(DeviceException):
     '''
     This exceptions is being thrown by operations changinng device state.

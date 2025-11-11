@@ -2,6 +2,8 @@
 WarmHouse MQTT Client
 '''
 
+from datetime import datetime
+
 from service.device.client.base_client import BaseDeviceClient
 from service.device.client.device_emu import DeviceEmulator
 from service.device.client.exceptions import WrongDeviceStateException

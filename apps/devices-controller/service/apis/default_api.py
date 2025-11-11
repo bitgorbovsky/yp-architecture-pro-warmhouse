@@ -67,6 +67,7 @@ async def v1_inspect_device(
         201: {"model": DeviceState, "description": "Состояние прибора."},
         401: {"model": ErrorMessage, "description": "Не был предоставлен токен авторизации, сервер не может обработать запрос. "},
         404: {"model": ErrorMessage, "description": "Ответ на некорректную операцию. "},
+        409: {"model": ErrorMessage, "description": "Ответ на некорректную операцию. "},
     },
     tags=["default"],
     summary="Запуск управления прибором",
