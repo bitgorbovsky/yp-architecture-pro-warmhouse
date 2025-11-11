@@ -197,7 +197,7 @@
 - [devices-registry](apps/devices-registry/Dockerfile)
 - [devices-controller](apps/devices-controller/Dockerfile)
 - [cdc](apps/cdc/config/application.properties)
-- [cdc-worker](app/cdc/worker/main.py)
+- [cdc-worker](apps/cdc/worker/main.py)
 
 Примечания:
 
