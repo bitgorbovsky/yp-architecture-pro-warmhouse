@@ -1,0 +1,8 @@
+# OpenAPI Generator Ignore
+Dockerfile
+requirements.txt
+service/main.py
+.gitignore
+README.md
+docker-compose.yaml
+tests/
