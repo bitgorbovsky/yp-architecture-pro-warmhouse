@@ -27,3 +27,9 @@ class NotSupportedProtocol(DeviceException):
     This exception is being thrown by operations where requested protocol is
     not supported
     '''
+
+class NotSupportedDevice(DeviceException):
+    '''
+    This exception is being thrown by operations when
+    type of requested devices is not supported by this provder and protocol.
+    '''

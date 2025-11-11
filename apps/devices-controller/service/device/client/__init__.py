@@ -21,9 +21,9 @@ def communicate_with(device_id: DeviceID):
     if not provider:
         raise NotSupportedProvider(f'provider {device_id.provider} is not supported')
 
-    client = __clients.get(device_id.protocol)
+    client = provider.get(device_id.protocol)
     if not client:
-        raise NotSupportedProtocol(f'provider {device_id.provider} does not support'
+        raise NotSupportedProtocol(f'provider {device_id.provider} does not support '
                                    f'protoctol {device_id.protocol}')
 
     return client

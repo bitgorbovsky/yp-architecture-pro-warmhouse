@@ -26,6 +26,7 @@ from service.models.extra_models import TokenModel  # noqa: F401
 from pydantic import Field, StrictStr
 from typing import Optional
 from typing_extensions import Annotated
+from service.models.device_meta import DeviceMeta
 from service.models.device_state import DeviceState
 from service.models.error_message import ErrorMessage
 from service.models.success_message import SuccessMessage
@@ -75,11 +76,12 @@ async def v1_connect_device(
     provider: Annotated[StrictStr, Field(description="Идентификатор провайдера приборов. ")] = Path(..., description="Идентификатор провайдера приборов. "),
     protocol: Annotated[StrictStr, Field(description="Идентификатор протокола приборов. ")] = Path(..., description="Идентификатор протокола приборов. "),
     address: Annotated[StrictStr, Field(description="Адрес прибора в части провайдера, обслуживающей заданный протокол. ")] = Path(..., description="Адрес прибора в части провайдера, обслуживающей заданный протокол. "),
+    device_meta: Optional[DeviceMeta] = Body(None, description=""),
 ) -> DeviceState:
-    """Создаёт сеанс управления прибором и запрашивает его начальное состояние. """
+    """Создаёт сеанс управления прибором и запрашивает его начальное состояние. Требует данных по модели прибора и его типу (а также возможно и по серийному номеру) определить необходимый протокол взаимодействия. Это сделано для того, чтобы поддерживать приборы, которые не поддерживают рефлексию, с помощью которой можно выявить, по каким протоколам можно взаимодействовать и какие функциональные возможности есть. Для приборов, которые поддерживают рефлекцию, данная информация может быть проигнорирована. """
     if not BaseDefaultApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseDefaultApi.subclasses[0]().v1_connect_device(provider, protocol, address)
+    return await BaseDefaultApi.subclasses[0]().v1_connect_device(provider, protocol, address, device_meta)
 
 
 @router.delete(

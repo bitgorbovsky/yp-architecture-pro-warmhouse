@@ -2,7 +2,7 @@
 Abstract base class for device emulator
 '''
 
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from service.models.device_state import DeviceState
 

@@ -4,15 +4,8 @@ Common datastructures
 
 from dataclasses import dataclass
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class DeviceID:
     provider: str
     protocol: str
     address: str
-
-
-@dataclass
-class DeviceMeta:
-    kind: str
-    model: str
-    serialnum: str

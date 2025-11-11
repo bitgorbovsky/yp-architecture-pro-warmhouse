@@ -76,7 +76,9 @@ class ThermostatEmulator(DeviceEmulator):
 
 
 class WarmHouseHTTPClient(BaseDeviceClient):
-    _supported_devices = {
-        'temperature': TemperatureSensorEmulator,
-        'thermostat': ThermostatEmulator
-    }
+    @classmethod
+    def supported_devices(cls):
+        return {
+            'temperature': TemperatureSensorEmulator,
+            'thermostat': ThermostatEmulator
+        }

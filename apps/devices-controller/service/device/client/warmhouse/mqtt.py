@@ -101,7 +101,9 @@ class LockEmulator:
 
 
 class WarmHouseMQTTClient(BaseDeviceClient):
-    _supported_devices = {
-        'bulb': BulbEmulator,
-        'lock': LockEmulator
-    }
+    @classmethod
+    def supported_devices(cls):
+        return {
+            'bulb': BulbEmulator,
+            'lock': LockEmulator
+        }

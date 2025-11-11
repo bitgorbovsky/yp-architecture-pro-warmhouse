@@ -152,7 +152,13 @@ paths:
     post:
       description: |
         Создаёт сеанс управления прибором и запрашивает его начальное
-        состояние.
+        состояние. Требует данных по модели прибора и его типу (а также
+        возможно и по серийному номеру) определить необходимый протокол
+        взаимодействия. Это сделано для того, чтобы поддерживать приборы,
+        которые не поддерживают рефлексию, с помощью которой можно выявить, по
+        каким протоколам можно взаимодействовать и какие функциональные
+        возможности есть. Для приборов, которые поддерживают рефлекцию, данная
+        информация может быть проигнорирована.
       operationId: v1ConnectDevice
       parameters:
       - description: |
@@ -182,6 +188,8 @@ paths:
         schema:
           type: string
         style: simple
+      requestBody:
+        $ref: "#/components/requestBodies/DeviceMeta"
       responses:
         "201":
           $ref: "#/components/responses/DeviceStateResponse"
@@ -200,6 +208,11 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/DeviceState"
+    DeviceMeta:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DeviceMeta"
   responses:
     SuccessResponse:
       content:
@@ -307,3 +320,23 @@ components:
       required:
       - features
       title: DeviceState
+    DeviceMeta:
+      example:
+        serialnum: serialnum
+        kind: kind
+        model: model
+      properties:
+        kind:
+          title: kind
+          type: string
+        model:
+          title: model
+          type: string
+        serialnum:
+          title: serialnum
+          type: string
+      required:
+      - kind
+      - model
+      - serialnum
+      title: DeviceMeta
